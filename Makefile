@@ -1,4 +1,4 @@
-NAME		= Animal
+NAME		= Webserv
 	
 CC			= c++
 FLAGS		= -Wall -Wextra -Werror
@@ -6,8 +6,8 @@ RM			= rm -rf
 
 OBJDIR = .objFiles
 
-FILES		= main Animal Dog Cat WrongAnimal WrongCat Brain
-HEADER		= Animal.hpp Dog.hpp Cat.hpp WrongAnimal.hpp WrongCat.hpp Brain.hpp
+FILES		= httpserver
+HEADER		= httpserver.hpp
 
 SRC			= $(FILES:=.cpp)
 OBJ			= $(addprefix $(OBJDIR)/, $(FILES:=.o))
