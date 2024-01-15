@@ -11,3 +11,14 @@
 - DELETE : Utilisée pour demander au serveur de supprimer une ressource spécifiée.
 
 - PATCH : Utilisée pour appliquer des modifications partielles à une ressource. Cela permet de mettre à jour seulement certaines parties de la ressource sans avoir à renvoyer l'ensemble des données.
+
+
+
+
+
+# Sources 
+
+- Serveur http
+- - https://feel5ny.github.io/2019/08/03/HTTP_001/
+- Methode http
+- - https://javaplant.tistory.com/18
