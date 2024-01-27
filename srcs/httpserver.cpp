@@ -1,6 +1,6 @@
-#include "httpserver.hpp"
+#include "../includes/httpserver.hpp"
 
-int main() {
+int essaie1() {
     // Création du socket
     int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSocket == -1) {

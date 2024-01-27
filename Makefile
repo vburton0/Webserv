@@ -1,4 +1,4 @@
-NAME		= Webserv
+NAME		= webserv
 	
 CC			= c++
 FLAGS		= -Wall -Wextra -Werror
@@ -6,8 +6,8 @@ RM			= rm -rf
 
 OBJDIR = .objFiles
 
-FILES		= httpserver
-HEADER		= httpserver.hpp
+FILES		= srcs/main srcs/httpserver
+HEADER		= includes/httpserver.hpp
 
 SRC			= $(FILES:=.cpp)
 OBJ			= $(addprefix $(OBJDIR)/, $(FILES:=.o))

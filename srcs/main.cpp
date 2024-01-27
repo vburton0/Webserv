@@ -2,12 +2,33 @@
 #include <string>
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
+#include <filesystem>
+#include "includes/httpserver.hpp"
 
 namespace asio = boost::asio;            // from <boost/asio.hpp>
 namespace beast = boost::beast;          // from <boost/beast.hpp>
 using tcp = asio::ip::tcp;               // from <boost/asio/ip/tcp.hpp>
 
-int main() {
+int main(int ac, char **av) {
+    
+    //Config File and args handler
+    std::string config_file;
+    if (ac == 1){
+        config_file = "config/default.conf";
+    } else if (ac == 2){
+        config_file = av[1];
+    } else {
+        std::cerr << "Usage: ./webserv [config_file]" << std::endl;
+        return 1;
+    }
+
+    // Check if config_file extension is ".conf"
+    if (std::filesystem::path(config_file).extension() != ".conf") {
+        throw std::runtime_error("Invalid config file extension. Must be '.conf'.");
+    }
+
+    
+
     try {
         // Créer une io_context pour gérer les opérations d'E/S
         asio::io_context io_context;

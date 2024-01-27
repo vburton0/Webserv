@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
+int essaie1();
 
 
 #endif
