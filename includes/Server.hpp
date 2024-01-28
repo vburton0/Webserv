@@ -34,6 +34,10 @@ public:
     int getPort() const { return port; }
     static std::list<Server> parseConfigFile(const std::string& configFile);
     
+    // Other utility functions
+    static bool isFileRequest(const std::string& uri);
+    static std::string getFilePath(const std::string& uri);
+    static std::string getMimeType(const std::string& filePath);
 
 private:
     std::string host;

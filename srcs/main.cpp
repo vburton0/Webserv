@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <cstring>
 #include <sstream>
+#include <fstream>
 #include "../includes/Webserv.hpp"
 
 bool hasExtension(const std::string& filename, const std::string& extension) {
@@ -18,6 +19,31 @@ bool hasExtension(const std::string& filename, const std::string& extension) {
     }
     return filename.substr(dotPos) == extension;
 }
+
+void parseHttpRequest(const std::string& request, std::string& method, std::string& uri, std::string& httpVersion, std::map<std::string, std::string>& headers) {
+    std::istringstream requestStream(request);
+    std::string line;
+
+    // Get the request line
+    std::getline(requestStream, line);
+    std::istringstream requestLineStream(line);
+    requestLineStream >> method >> uri >> httpVersion;
+
+    std::cout << "\n\n\n\n\nRequest:\n" << request << "\n\n\n\n\n" << std::endl;  // DEBUG
+    // Read headers
+    while (std::getline(requestStream, line) && line != "\r") {
+        std::istringstream headerLineStream(line);
+        std::string key, value;
+        if (std::getline(headerLineStream, key, ':')) {
+            std::getline(headerLineStream, value);
+            if (!value.empty() && value[0] == ' ') {
+                value.erase(0, 1); // Remove leading space
+            }
+            headers[key] = value;
+        }
+    }
+}
+
 
 int main(int ac, char **av) {
     // Config File and args handler
@@ -96,6 +122,13 @@ int main(int ac, char **av) {
                 max_sd = socket;
         }
 
+        for (int clientSocket : webserv.clientSockets) {
+            FD_SET(clientSocket, &readfds);
+            if (clientSocket > max_sd) {
+                max_sd = clientSocket;
+            }
+        }
+
         // Timeout for select (optional)
         struct timeval timeout;
         timeout.tv_sec = 5;
@@ -131,47 +164,104 @@ int main(int ac, char **av) {
             }
         }
 
+        // Handle data from clients
         for (int clientSocket : webserv.clientSockets) {
-        if (FD_ISSET(clientSocket, &readfds)) {
-            char buffer[1024];
-            ssize_t bytesRead = read(clientSocket, buffer, sizeof(buffer) - 1);
+            if (FD_ISSET(clientSocket, &readfds)) {
+                std::string accumulatedRequest;
+                char buffer[1024];
+                bool endOfRequest = false;
 
-            if (bytesRead < 0) {
-                if (errno != EWOULDBLOCK) {
-                    perror("read error");
-                    close(clientSocket); // Close on error
-                }
-            } else if (bytesRead == 0) {
-                std::cout << "Client disconnected" << std::endl;
-                close(clientSocket); // Close on disconnection
-            } else {
-                buffer[bytesRead] = '\0'; // Null-terminate the string
-                std::cout << "Received data: " << buffer << std::endl;
-                // TODO: Parse HTTP request and respond
-                std::istringstream requestStream(buffer);
-                std::string requestLine;
-                std::getline(requestStream, requestLine); // Get the request line
+                while (!endOfRequest) {
+                    ssize_t bytesRead = read(clientSocket, buffer, sizeof(buffer) - 1);
+                    if (bytesRead > 0) {
+                        buffer[bytesRead] = '\0'; // Null-terminate the string
+                        accumulatedRequest += buffer;
 
-                std::string method, uri, httpVersion;
-                std::istringstream requestLineStream(requestLine);
-                requestLineStream >> method >> uri >> httpVersion;
-
-                // Output the parsed request line (for debugging)
-                std::cout << "Method: " << method << ", URI: " << uri << ", HTTP Version: " << httpVersion << std::endl;
-
-                // Parse headers (a simplistic approach)
-                std::string headerLine;
-                while (std::getline(requestStream, headerLine) && headerLine != "\r") {
-                    std::cout << "Header: " << headerLine << std::endl;
-                    // Further processing of headers as needed
+                        // Check if the end of headers (or entire request) is reached
+                        if (accumulatedRequest.find("\r\n\r\n") != std::string::npos) {
+                            endOfRequest = true;
+                        }
+                    } else if (bytesRead == 0) {
+                        std::cout << "Client disconnected" << std::endl;
+                        close(clientSocket); // Close on disconnection
+                        endOfRequest = true;
+                    } else {
+                        if (errno != EWOULDBLOCK) {
+                            perror("read error");
+                            close(clientSocket); // Close on error
+                        }
+                        break; // Exit loop if no data is currently available
+                    }
                 }
 
-                // If POST, read the body based on Content-Length (this is a simplistic approach)
-                if (method == "POST") {
-                    // TODO: Handle POST request body
+                // Check if we have accumulated a complete request
+                if (!accumulatedRequest.empty()) {
+                    std::cout << "Received: " << buffer << std::endl;
+
+                    // Check if the end of headers is reached
+                    if (accumulatedRequest.find("\r\n\r\n") != std::string::npos) {
+                        // Now you have the complete headers in clientBuffers[clientSocket]
+                        // Parse the request here
+                        std::string method, uri, httpVersion;
+                        std::map<std::string, std::string> headers;
+                        parseHttpRequest(accumulatedRequest, method, uri, httpVersion, headers);
+                    
+                    std::cout << "Method: " << method << ", URI: " << uri << ", HTTP Version: " << httpVersion << std::endl;
+                    
+                    
+                    // TODO: Parse HTTP request and respond
+                    // std::istringstream requestStream(buffer);
+                    // std::string requestLine;
+                    // std::getline(requestStream, requestLine); // Get the request line
+
+                    // std::string method, uri, httpVersion;
+                    // std::istringstream requestLineStream(requestLine);
+                    // requestLineStream >> method >> uri >> httpVersion;
+
+                    // // Output the parsed request line (for debugging)
+                    // std::cout << "Method: " << method << ", URI: " << uri << ", HTTP Version: " << httpVersion << std::endl;
+
+                    // Parse headers (a simplistic approach)
+                    // std::string headerLine;
+                    // while (std::getline(requestStream, headerLine) && headerLine != "\r") {
+                    //     std::cout << "Header: " << headerLine << std::endl;
+                    //     // Further processing of headers as needed
+                    // }
+
+                    // Test to see what's de method
+                    std::cout << "HTTP Method: " << method << std::endl;
+
+                    // If POST, read the body based on Content-Length (this is a simplistic approach)
+                    if (method == "POST") {
+                        // TODO: Handle POST request body
+                    }
+                    if (method == "GET") {
+                        std::string targetUri = uri;
+                        if (uri == "/") {
+                            targetUri = "/index.html";  // Serve index.html for the root URI
+                        }
+
+                        if (Server::isFileRequest(targetUri)) {
+                            std::cout << "File request: " << targetUri << std::endl;
+                            std::string filePath = Server::getFilePath(targetUri);
+                            std::ifstream file(filePath.c_str(), std::ios::binary);
+                            std::cout << "File path: " << filePath << std::endl;
+
+                            if (file) {
+                                std::ostringstream ss;
+                                ss << file.rdbuf();
+                                std::string fileContent = ss.str();
+                                std::string response = "HTTP/1.1 200 OK\r\nContent-Type: " + Server::getMimeType(filePath) + "\r\n\r\n" + fileContent;
+                                write(clientSocket, response.c_str(), response.length());
+                            } else {
+                                std::string response = "HTTP/1.1 404 Not Found\r\n\r\n";
+                                write(clientSocket, response.c_str(), response.length());
+                            }
+                        }
+                    }
+                    }
                 }
             }
-        }
         }
     }
 

@@ -58,3 +58,37 @@ std::list<Server> Server::parseConfigFile(const std::string& filename) {
 
     return servers;
 }
+
+bool Server::isFileRequest(const std::string& uri) {
+    size_t lastDotPos = uri.find_last_of(".");
+    if (lastDotPos != std::string::npos) {
+        // Check if there's an extension
+        return uri.find('/', lastDotPos) == std::string::npos; // Ensure no '/' after the dot
+    }
+    return false;
+}
+
+std::string Server::getFilePath(const std::string& uri) {
+    const std::string rootDirectory = "resources/Les2canons"; // Change to your static files directory
+    return rootDirectory + uri; // Simple concatenation of root directory and URI
+}
+
+std::string Server::getMimeType(const std::string& filePath) {
+    size_t dotPos = filePath.find_last_of(".");
+    if (dotPos != std::string::npos) {
+        std::string ext = filePath.substr(dotPos + 1);
+
+        // Basic MIME types
+        if (ext == "html" || ext == "htm") return "text/html";
+        if (ext == "css") return "text/css";
+        if (ext == "js") return "application/javascript";
+        if (ext == "json") return "application/json";
+        if (ext == "png") return "image/png";
+        if (ext == "jpg" || ext == "jpeg") return "image/jpeg";
+        if (ext == "gif") return "image/gif";
+        if (ext == "svg") return "image/svg+xml";
+        if (ext == "txt") return "text/plain";
+        // Add more MIME types as needed
+    }
+    return "application/octet-stream"; // Default MIME type
+}
