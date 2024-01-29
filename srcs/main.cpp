@@ -1,8 +1,6 @@
 #include "../includes/Server.hpp"
 #include <iostream>
 #include <filesystem>
-#include <list>
-#include <string>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -251,8 +249,16 @@ int main(int ac, char **av) {
                                 std::ostringstream ss;
                                 ss << file.rdbuf();
                                 std::string fileContent = ss.str();
-                                std::string response = "HTTP/1.1 200 OK\r\nContent-Type: " + Server::getMimeType(filePath) + "\r\n\r\n" + fileContent;
-                                write(clientSocket, response.c_str(), response.length());
+                                
+                                // Old response
+                                //std::string response = "HTTP/1.1 200 OK\r\nContent-Type: " + Server::getMimeType(filePath) + "\r\n\r\n" + fileContent;
+                                // write(clientSocket, response.c_str(), response.length());
+                                
+                                std::string responseHeader = "HTTP/1.1 200 OK\r\nContent-Type: " + Server::getMimeType(filePath) + "\r\nContent-Length: " + std::to_string(fileContent.length()) + "\r\n\r\n";
+                                write(clientSocket, responseHeader.c_str(), responseHeader.length());
+
+                                write(clientSocket, fileContent.c_str(), fileContent.length());
+
                             } else {
                                 std::string response = "HTTP/1.1 404 Not Found\r\n\r\n";
                                 write(clientSocket, response.c_str(), response.length());
