@@ -5,17 +5,19 @@
 #include <vector>
 #include <map>
 #include <list>
+#include <iostream>
 
 class Server {
 public:
     struct RouteConfig {
         std::string path;
+        std::string root;
         std::vector<std::string> methods;
         std::string rootDirectory;
         std::string uploadPath;
         bool directoryListing;
         std::string defaultFile;
-        std::map<std::string, std::string> cgiHandlers; // Extension and CGI path
+        std::map<std::string, std::string> cgi; // Extension and CGI path
         // Additional route-specific settings
     };
 
@@ -27,7 +29,9 @@ public:
     void addServerName(const std::string& name) { serverNames.push_back(name); }
     void setErrorPage(int statusCode, const std::string& path) { errorPages[statusCode] = path; }
     void setClientMaxBodySize(size_t size) { clientMaxBodySize = size; }
-    void addRoute(const RouteConfig& route) { routes.push_back(route); }
+    void setRoute(const std::string& path, const RouteConfig& route) { routes[path] = route; }
+    void setRootDirectory(const std::string& dir) { rootDirectory = dir; }
+    void setDefaultFile(const std::string& file) { defaultFile = file; }
 
     // Getters and other utility functions
     const std::string& getHost() const { return host; }
@@ -45,7 +49,9 @@ private:
     std::vector<std::string> serverNames;
     std::map<int, std::string> errorPages;
     size_t clientMaxBodySize;
-    std::vector<RouteConfig> routes;
+    std::map<std::string, RouteConfig> routes; // Map of route path to configuration
+    std::string rootDirectory; // Root directory for static files
+    std::string defaultFile; // Default file to serve
 
     // Other server-wide settings
 

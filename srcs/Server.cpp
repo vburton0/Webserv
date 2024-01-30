@@ -12,11 +12,23 @@ std::list<Server> Server::parseConfigFile(const std::string& filename) {
     std::string line;
     Server currentServer;
     bool inServerBlock = false;
+    bool inRouteBlock = false;
+    std::string currentRoutePath;
+    RouteConfig currentRouteConfig;
 
     while (std::getline(configFile, line)) {
+        // Ignores comments and empty lines
+        size_t commentPos = line.find('#');
+        if (commentPos != std::string::npos) {
+            line = line.substr(0, commentPos);
+        }
+        if (line.empty() || line[0] == '#') continue;
+
         std::istringstream iss(line);
         std::string key;
         iss >> key;
+
+        std::cout << "Line : " << line << std::endl;
 
         if (key == "server") {
             if (inServerBlock) {
@@ -42,8 +54,54 @@ std::list<Server> Server::parseConfigFile(const std::string& filename) {
             while (iss >> name) {
                 currentServer.addServerName(name);
             }
+        } else if (inServerBlock && key == "error_page") {
+            int errorCode;
+            std::string errorPage;
+            if (!(iss >> errorCode >> errorPage)) {
+                throw std::runtime_error("Invalid format for error_page directive");
+            }
+            currentServer.setErrorPage(errorCode, errorPage);
+        } else if (inServerBlock && key == "client_body_size") {
+            int size;
+            if (!(iss >> size)) {
+                throw std::runtime_error("Invalid format for client_body_size directive");
+            }
+            currentServer.setClientMaxBodySize(size);
+        }else if (inServerBlock && key == "root") {
+            iss >> currentServer.rootDirectory;
+        } else if (inServerBlock && key == "index") {
+            iss >> currentServer.defaultFile;
+        } else if (inServerBlock && key == "route") {
+            iss >> currentRoutePath;
+            inRouteBlock = true;
+            currentRouteConfig = RouteConfig();
+        } else if (inRouteBlock) {
+            if (key == "methods") {
+                std::string method;
+                while (iss >> method) {
+                    currentRouteConfig.methods.push_back(method);
+                }
+            } else if (key == "root") {
+                iss >> currentRouteConfig.root;
+            } else if (key == "directory_listing") {
+                std::string listing;
+                iss >> listing;
+                currentRouteConfig.directoryListing = (listing == "on");
+            } else if (key == "default_file") {
+                iss >> currentRouteConfig.defaultFile;
+            } else if (key == "cgi") {
+                std::string ext, cgiPath;
+                iss >> ext >> cgiPath;
+                currentRouteConfig.cgi[ext] = cgiPath;
+            } else if (key == "upload_path") {
+                iss >> currentRouteConfig.uploadPath;
+            }
         }
-        // Continue parsing other directives...
+
+        if (inRouteBlock && line == "}") {
+            currentServer.setRoute(currentRoutePath, currentRouteConfig);
+            inRouteBlock = false;
+        }
 
         if (inServerBlock && line == "}") {
             servers.push_back(currentServer);

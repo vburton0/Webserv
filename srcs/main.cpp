@@ -8,9 +8,6 @@
 #include <cstring>
 #include <sstream>
 #include <fstream>
-#include <poll.h>
-#include <vector>
-#include <algorithm>
 #include "../includes/Webserv.hpp"
 
 bool hasExtension(const std::string& filename, const std::string& extension) {
@@ -108,66 +105,96 @@ int main(int ac, char **av) {
         //  //  //  //  //  //  //  //std::vector<int> serverSockets;
         webserv.serverSockets.push_back(serverSocket);
     }
-    // Try with Poll
-    std::vector<struct pollfd> fds;
-
-    // Add all server sockets to the fds vector for monitoring incoming connections
-    for (int serverSocket : webserv.serverSockets) {
-        struct pollfd server_fd = { .fd = serverSocket, .events = POLLIN, .revents = 0 };
-        fds.push_back(server_fd);
-    }
-
-    // Optionally, add existing client sockets to the fds vector
-    for (int clientSocket : webserv.clientSockets) {
-        struct pollfd client_fd = { .fd = clientSocket, .events = POLLIN, .revents = 0 };
-        fds.push_back(client_fd);
-    }
 
     // 5. Main loop for handling connections
-    // fd_set readfds;
-    // int max_sd;
+    fd_set readfds;
+    int max_sd;
 
-    int timeout = -1; // Timeout in milliseconds, -1 for no timeout
+    while (true) {
+        FD_ZERO(&readfds);
 
-while (true) {
-    int ret = poll(fds.data(), fds.size(), timeout);
+        max_sd = -1;
+        for (int socket : webserv.serverSockets) {
+            FD_SET(socket, &readfds);
+            if (socket > max_sd)
+                max_sd = socket;
+        }
 
-    if (ret < 0) {
-        std::cerr << "poll error: " << std::strerror(errno) << std::endl;
-        break;
-    } else if (ret == 0) {
-        // Timeout occurred, handle if needed
-        continue;
-    }
+        for (int clientSocket : webserv.clientSockets) {
+            FD_SET(clientSocket, &readfds);
+            if (clientSocket > max_sd) {
+                max_sd = clientSocket;
+            }
+        }
 
-    // Iterate over fds to check which ones are ready
-    for (auto &fd : fds) {
-        if (fd.revents & POLLIN) {
-            if (std::find(webserv.serverSockets.begin(), webserv.serverSockets.end(), fd.fd) != webserv.serverSockets.end()) {
-                // Handle new connections on server sockets
+        // Timeout for select (optional)
+        struct timeval timeout;
+        timeout.tv_sec = 5;
+        timeout.tv_usec = 0;
+
+        // Wait for an activity on one of the sockets
+        int activity = select(max_sd + 1, &readfds, NULL, NULL, &timeout);
+
+        if ((activity < 0) && (errno != EINTR)) {
+            perror("select error");
+        }
+
+        // Handle incoming connections and data
+        for (int socket : webserv.serverSockets) {
+            if (FD_ISSET(socket, &readfds)) {
+                // Handle new connections or read data
                 struct sockaddr_in clientAddr;
                 socklen_t clientAddrLen = sizeof(clientAddr);
-                int newClientSocket = accept(fd.fd, (struct sockaddr *)&clientAddr, &clientAddrLen);
-                if (newClientSocket >= 0) {
-                    struct pollfd new_fd = { .fd = newClientSocket, .events = POLLIN, .revents = 0 };
-                    fds.push_back(new_fd);
-                    webserv.clientSockets.push_back(newClientSocket);
+                int newSocket = accept(socket, (struct sockaddr *)&clientAddr, &clientAddrLen);
+                if (newSocket < 0) {
+                    perror("accept");
+                    continue;
                 }
-            } else {
-                // This is a client socket, handle data from client
+
+                // Optionally set the new socket to non-blocking mode
+                fcntl(newSocket, F_SETFL, O_NONBLOCK);
+
+                // Add the new socket to the list of client sockets
+                webserv.clientSockets.push_back(newSocket);
+
+                // Log or handle new connection
+                std::cout << "New connection accepted" << std::endl;
+            }
+        }
+
+        // Handle data from clients
+        for (int clientSocket : webserv.clientSockets) {
+            if (FD_ISSET(clientSocket, &readfds)) {
                 std::string accumulatedRequest;
                 char buffer[1024];
-                ssize_t bytesRead;
+                bool endOfRequest = false;
 
-                bytesRead = read(fd.fd, buffer, sizeof(buffer) - 1);
-                if (bytesRead > 0) {
-                    buffer[bytesRead] = '\0'; // Null-terminate the string
-                    accumulatedRequest += buffer;
+                while (!endOfRequest) {
+                    ssize_t bytesRead = read(clientSocket, buffer, sizeof(buffer) - 1);
+                    if (bytesRead > 0) {
+                        buffer[bytesRead] = '\0'; // Null-terminate the string
+                        accumulatedRequest += buffer;
 
-                    // Check if the end of headers (or entire request) is reached
-                    if (accumulatedRequest.find("\r\n\r\n") != std::string::npos) {
-                        // Process the request
-                        std::cout << "Received: " << buffer << std::endl;
+                        // Check if the end of headers (or entire request) is reached
+                        if (accumulatedRequest.find("\r\n\r\n") != std::string::npos) {
+                            endOfRequest = true;
+                        }
+                    } else if (bytesRead == 0) {
+                        std::cout << "Client disconnected" << std::endl;
+                        close(clientSocket); // Close on disconnection
+                        endOfRequest = true;
+                    } else {
+                        if (errno != EWOULDBLOCK) {
+                            perror("read error");
+                            close(clientSocket); // Close on error
+                        }
+                        break; // Exit loop if no data is currently available
+                    }
+                }
+
+                // Check if we have accumulated a complete request
+                if (!accumulatedRequest.empty()) {
+                    std::cout << "Received: " << buffer << std::endl;
 
                     // Check if the end of headers is reached
                     if (accumulatedRequest.find("\r\n\r\n") != std::string::npos) {
@@ -217,7 +244,6 @@ while (true) {
                             std::string filePath = Server::getFilePath(targetUri);
                             std::ifstream file(filePath.c_str(), std::ios::binary);
                             std::cout << "File path: " << filePath << std::endl;
-                            
 
                             if (file) {
                                 std::ostringstream ss;
@@ -229,41 +255,22 @@ while (true) {
                                 // write(clientSocket, response.c_str(), response.length());
                                 
                                 std::string responseHeader = "HTTP/1.1 200 OK\r\nContent-Type: " + Server::getMimeType(filePath) + "\r\nContent-Length: " + std::to_string(fileContent.length()) + "\r\n\r\n";
-                                write(fd.fd, responseHeader.c_str(), responseHeader.length());
+                                write(clientSocket, responseHeader.c_str(), responseHeader.length());
 
-                                write(fd.fd, fileContent.c_str(), fileContent.length());
+                                write(clientSocket, fileContent.c_str(), fileContent.length());
 
                             } else {
                                 std::string response = "HTTP/1.1 404 Not Found\r\n\r\n";
-                                write(fd.fd, response.c_str(), response.length());
+                                write(clientSocket, response.c_str(), response.length());
                             }
                         }
                     }
-            }
-        }
-                } else if (bytesRead == 0) {
-                    // Client disconnected
-                    std::cout << "Client disconnected, socket: " << fd.fd << std::endl;
-                    close(fd.fd);
-                    fd.fd = -1;
-                } else {
-                    if (errno != EWOULDBLOCK) {
-                        std::cerr << "read error: " << std::strerror(errno) << std::endl;
-                        close(fd.fd);
-                        fd.fd = -1;
-        }
+                    }
                 }
-
-
-                
             }
         }
-        // Remove closed sockets from fds and webserv.clientSockets
-        fds.erase(std::remove_if(fds.begin(), fds.end(), [](const struct pollfd &pfd) { return pfd.fd == -1; }), fds.end());
-        webserv.clientSockets.erase(std::remove_if(webserv.clientSockets.begin(), webserv.clientSockets.end(),
-                                                [&fds](int socket) { return std::none_of(fds.begin(), fds.end(), [socket](const struct pollfd &pfd) { return pfd.fd == socket; }); }),
-                                    webserv.clientSockets.end());
     }
+
+
     return 0;
-}
 }
