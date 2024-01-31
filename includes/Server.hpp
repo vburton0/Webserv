@@ -38,6 +38,9 @@ public:
     static bool isFileRequest(const std::string& uri);
     static std::string getFilePath(const std::string& uri);
     static std::string getMimeType(const std::string& filePath);
+	
+	//modif emma 
+	static bool isCgiRequest(const std::string& uri);
 
 private:
     std::string host;

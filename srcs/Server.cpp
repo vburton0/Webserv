@@ -92,3 +92,18 @@ std::string Server::getMimeType(const std::string& filePath) {
     }
     return "application/octet-stream"; // Default MIME type
 }
+
+//emma modif 
+bool Server::isCgiRequest(const std::string& uri) {
+    // Liste des extensions CGI
+    const std::vector<std::string> cgiExtensions = {".php", ".cgi", ".pl"};
+
+    // Vérifier si l'URI se termine par une extension CGI
+    for (const auto& ext : cgiExtensions) {
+        if (uri.size() >= ext.size() && uri.compare(uri.size() - ext.size(), ext.size(), ext) == 0) {
+            return true;
+        }
+    }
+
+    return false;
+}
