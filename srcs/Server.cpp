@@ -484,7 +484,6 @@ void Server::analyseRequest(std::string bufstr)
 		size_t index = bufstr.find("Content-Length: ");
 		if (index == std::string::npos)
 			sendError(411, "411 Length Required");
-			// sendError(201, "201 Created");
 		std::istringstream iss(bufstr.substr(index + 16, bufstr.find('\n', index + 16)));
 		size_t expected_size;
 		iss >> expected_size;
@@ -553,7 +552,6 @@ void Server::analyseRequest(std::string bufstr)
 
 std::string Server::get_path_from_locations(std::string & loc, int method_offset, std::string method, bool recursive_stop)
 {
-	// std::cout << "get_path_from_loc" << std::endl;
 	std::string ret;
 	std::string substr_loc = loc.substr(4 + method_offset, loc.find(" ", 4 + method_offset) - (4 + method_offset));
 	size_t match_size = 0;
@@ -563,9 +561,6 @@ std::string Server::get_path_from_locations(std::string & loc, int method_offset
 	for (size_t loc_index = 0; loc_index < this->_locations.size(); loc_index++)
 	{
 		size_t loc_size = this->_locations[loc_index]->location.size();
-		// std::cout << "match_index: " << match_index << std::endl;
-		// std::cout << "loc_size: " << loc_size << ", substr_loc.size" << substr_loc.size() << std::endl;
-		// std::cout << "loc: " << this->_locations[loc_index]->location << ", substr_loc" << substr_loc << std::endl;
 		if (loc_size <= substr_loc.size() && ((!this->_locations[loc_index]->suffixed && !substr_loc.compare(0, loc_size, this->_locations[loc_index]->location))
 			|| (this->_locations[loc_index]->suffixed && !substr_loc.compare(substr_loc.size() - loc_size, loc_size, this->_locations[loc_index]->location))))
 		{
@@ -586,7 +581,6 @@ std::string Server::get_path_from_locations(std::string & loc, int method_offset
 			}
 		}
 	}
-	// std::cout << "match_size: " << match_size << std::endl;
 	if (!recursive_stop && match_size && std::find(this->_locations[match_index]->methods.begin(), this->_locations[match_index]->methods.end(), method) == this->_locations[match_index]->methods.end())
 	{
 		send_method_error(this->_locations[match_index]->methods);
@@ -601,8 +595,6 @@ std::string Server::get_path_from_locations(std::string & loc, int method_offset
 	this->_initial_loc = substr_loc;
 	std::string saved_root = ret;
 	loc = loc.substr(0, 4 + method_offset) + loc.substr(4 + method_offset + match_size);
-	// std::cout << "loc after: " << loc << std::endl;
-
 	if (!loc.compare(4 + method_offset, 2, "/ ") || !loc.compare(4 + method_offset, 1, " "))
 	{
 		if (match_index_files.empty())
