@@ -6,8 +6,8 @@ RM			= rm -rf
 
 OBJDIR = .objFiles
 
-FILES		= srcs/main srcs/Server 
-HEADER		= includes/Server.hpp includes/Webserv.hpp
+FILES		= srcs/main_poll srcs/Server srcs/Webserv srcs/cgi srcs/Location srcs/utils
+HEADER		= includes/Server.hpp includes/Webserv.hpp includes/cgi.hpp includes/Location.hpp includes/utils.hpp
 
 SRC			= $(FILES:=.cpp)
 OBJ			= $(addprefix $(OBJDIR)/, $(FILES:=.o))

@@ -1,62 +1,102 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
+#include "cgi.hpp"
+#include "Location.hpp"
+#include "utils.hpp"
 #include <string>
 #include <vector>
 #include <map>
 #include <list>
 #include <iostream>
+# include <dirent.h>
+#include <sstream>
+#include <fstream>
+# include <set>
 
-class Server {
-public:
-    struct RouteConfig {
-        std::string path;
-        std::string root;
-        std::vector<std::string> methods;
-        std::string rootDirectory;
-        std::string uploadPath;
-        bool directoryListing;
-        std::string defaultFile;
-        std::map<std::string, std::string> cgi; // Extension and CGI path
-        // Additional route-specific settings
-    };
+class Location;
 
-    Server() : port(0), clientMaxBodySize(0) {}
+class Server
+{
+    private:
+        std::string host;
+        int port;
+        std::string _root;
+        std::vector<Location *> _locations;
+        std::string _initial_loc;
+        std::string _serverType;
+        std::list<std::string> _indexFile;
+        bool _bodySighted;
+        std::map<int, std::string> _errorPages;
+        size_t _maxBodySize;
+        std::string rootDirectory; // Root directory for static files
+        std::string defaultFile; // Default file to serve
 
-    // Setters
-    void setHost(const std::string& h) { host = h; }
-    void setPort(int p) { port = p; }
-    void addServerName(const std::string& name) { serverNames.push_back(name); }
-    void setErrorPage(int statusCode, const std::string& path) { errorPages[statusCode] = path; }
-    void setClientMaxBodySize(size_t size) { clientMaxBodySize = size; }
-    void setRoute(const std::string& path, const RouteConfig& route) { routes[path] = route; }
-    void setRootDirectory(const std::string& dir) { rootDirectory = dir; }
-    void setDefaultFile(const std::string& file) { defaultFile = file; }
+        // Other server-wide settings
 
-    // Getters and other utility functions
-    const std::string& getHost() const { return host; }
-    int getPort() const { return port; }
-    static std::list<Server> parseConfigFile(const std::string& configFile);
-    
-    // Other utility functions
-    static bool isFileRequest(const std::string& uri);
-    static std::string getFilePath(const std::string& uri);
-    static std::string getMimeType(const std::string& filePath);
+    public:
+        struct RouteConfig {
+            std::string path;
+            std::string root;
+            std::vector<std::string> methods;
+            std::string rootDirectory;
+            std::string uploadPath;
+            bool directoryListing;
+            std::string defaultFile;
+            std::map<std::string, std::string> cgi; // Extension and CGI path
+            // Additional route-specific settings
+        };
 
-private:
-    std::string host;
-    int port;
-    std::vector<std::string> serverNames;
-    std::map<int, std::string> errorPages;
-    size_t clientMaxBodySize;
-    std::map<std::string, RouteConfig> routes; // Map of route path to configuration
-    std::string rootDirectory; // Root directory for static files
-    std::string defaultFile; // Default file to serve
+        std::list<std::string> _serverNames;
+        std::list<int> ports;
+        int socketFd;
+        size_t actualBodySize;
+        std::map<std::string, RouteConfig> routes; // Map of route path to configuration
+        Server() : port(0), _maxBodySize(0) {}
 
-    // Other server-wide settings
+        // Setters
+        void setHost(const std::string& h) { host = h; }
+        void setPort(int p) { port = p; }
+        void addServerName(const std::string& name) { _serverNames.push_back(name); }
+        void setErrorPage(int statusCode, const std::string& path) { _errorPages[statusCode] = path; }
+        void setClientMaxBodySize(size_t size) { _maxBodySize = size; }
+        void setRoute(const std::string& path, const RouteConfig& route) { routes[path] = route; }
+        void setRootDirectory(const std::string& dir) { rootDirectory = dir; }
+        void setDefaultFile(const std::string& file) { defaultFile = file; }
+        void add_ports(std::set<int> &all_ports, size_t *number_of_ports);
 
-    // Private methods for internal processing
-    // ...
+        //Copy
+        void check_set_default(void);
+        void compare_block_info(std::string line, std::ifstream & indata);
+        void showServerContent(void);
+        std::string recvRequest(int flag);
+        void sendResponse(const std::string response);
+        void sendError(int err_code, std::string errstr);
+        std::string checkChunckEncoding(std::string bufstr);
+        void analyseRequest(std::string bufstr);
+        std::string get_path_from_locations(std::string & loc, int head_offset, std::string method, bool recursive_stop);
+        void dir_listing(DIR *dir);
+        void receive_put_content(std::string bufstr, std::ofstream &outfile, size_t expected_size, std::string content);
+        void send_method_error(std::vector<std::string> methods);
+        void check_for_cgi(std::string header, std::string bufstr, int method_offset, std::string method, std::string saved_root);
+        std::string get_first_index_file(std::string root, std::list<std::string> index_files, bool auto_index);
+
+        // Getters and other utility functions
+        const std::string& getHost() const { return host; }
+        int getPort() const { return port; }
+        static std::list<Server> parseConfigFile(const std::string& configFile);
+        
+        // Other utility functions
+        static bool isFileRequest(const std::string& uri);
+        static std::string getFilePath(const std::string& uri);
+        static std::string getMimeType(const std::string& filePath);
+
+
+        class IncompleteServerException : public std::exception
+        {
+            public:
+                const char *what() const throw();
+        };
 };
 
 #endif // SERVER_HPP
