@@ -131,6 +131,8 @@ std::string Server::getFilePath(const std::string& uri) {
     return rootDirectory + uri; // Simple concatenation of root directory and URI
 }
 
+
+
 std::string Server::getMimeType(const std::string& filePath) {
     size_t dotPos = filePath.find_last_of(".");
     if (dotPos != std::string::npos) {

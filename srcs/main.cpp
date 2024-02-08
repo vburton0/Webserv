@@ -204,7 +204,7 @@ int main(int ac, char **av) {
                         std::map<std::string, std::string> headers;
                         parseHttpRequest(accumulatedRequest, method, uri, httpVersion, headers);
                     
-                    std::cout << "Method: " << method << ", URI: " << uri << ", HTTP Version: " << httpVersion << std::endl;
+                    std::cout << "Method: " << method << ", URI: " << uri << std::endl;
                     
                     
                     // TODO: Parse HTTP request and respond
@@ -254,7 +254,8 @@ int main(int ac, char **av) {
                                 //std::string response = "HTTP/1.1 200 OK\r\nContent-Type: " + Server::getMimeType(filePath) + "\r\n\r\n" + fileContent;
                                 // write(clientSocket, response.c_str(), response.length());
                                 
-                                std::string responseHeader = "HTTP/1.1 200 OK\r\nContent-Type: " + Server::getMimeType(filePath) + "\r\nContent-Length: " + std::to_string(fileContent.length()) + "\r\n\r\n";
+                                // std::string responseHeader = "HTTP/1.1 200 OK\r\nContent-Type: " + Server::getMimeType(filePath) + "\r\nContent-Length: " + std::to_string(fileContent.length()) + "\r\n\r\n";
+                                std::string responseHeader = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\nConnection: close\r\n\r\nHello, World!";
                                 write(clientSocket, responseHeader.c_str(), responseHeader.length());
 
                                 write(clientSocket, fileContent.c_str(), fileContent.length());
