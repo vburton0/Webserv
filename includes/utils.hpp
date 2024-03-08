@@ -26,7 +26,7 @@ int check_http_version(std::string bufstr);
 int check_correct_host(std::string bufstr, std::list<std::string>);
 int check_header_names(std::string bufstr);
 std::string GET_content_type(std::string file);
-char **get_execve_args(std::string file_path);
+char **getExecveArgs(std::string file_path);
 std::string get_last_word(std::string str);
 
 #endif

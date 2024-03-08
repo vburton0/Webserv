@@ -51,11 +51,11 @@ Cgi::Cgi(std::string header, std::string file_path, Server *serv, std::string sa
 	if (!pid)
 	{
 		//setup env
-		char **envp = set_envp(saved_root);
+		char **envp = setEnv(saved_root);
 		for (int index = 0; envp[index]; index++)
 				std::cout << "env line: " << envp[index] << std::endl;
 
-		char **args = get_execve_args();
+		char **args = getExecveArgs();
 		if (dup2(pipe_fd[1], 1) == -1)
 			serv->sendError(500, "500 Internal Server Error");
 		close(pipe_fd[0]);
@@ -134,7 +134,7 @@ Cgi::~Cgi(void)
 //                                  Private                                   //
 // ************************************************************************** //
 
-char **Cgi::get_execve_args(void)
+char **Cgi::getExecveArgs(void)
 {
 	size_t size = this->_file_path.size();
 	if (size > 3)
@@ -162,7 +162,7 @@ char **Cgi::get_execve_args(void)
 	return (res);
 }
 
-char **Cgi::set_envp(std::string saved_root)
+char **Cgi::setEnv(std::string saved_root)
 {
 	/*
     SERVER_PROTOCOL: HTTP/version.
@@ -188,19 +188,17 @@ char **Cgi::set_envp(std::string saved_root)
 	std::map<std::string, std::string> env_map;
 	env_map.insert(std::pair<std::string, std::string>("SERVER_PROTOCOL", "HTTP/1.1"));
 	env_map.insert(std::pair<std::string, std::string>("SERVER_PORT", get_port()));
-	env_map.insert(std::pair<std::string, std::string>("REQUEST_METHOD", get_method()));
-	// env_map.insert(std::pair<std::string, std::string>("PATH_INFO", 
-	add_path_info(env_map, saved_root);
-	// env_map.insert(std::pair<std::string, std::string>("PATH_TRANSLATED", get_path_translated()));
-	env_map.insert(std::pair<std::string, std::string>("SCRIPT_NAME", get_script_relative(saved_root)));
-	env_map.insert(std::pair<std::string, std::string>("REMOTE_HOST", get_remote_host()));
+	env_map.insert(std::pair<std::string, std::string>("REQUEST_METHOD", getMethod()));
+	insertPathInfo(env_map, saved_root);
+	env_map.insert(std::pair<std::string, std::string>("SCRIPT_NAME", getScriptRelative(saved_root)));
+	env_map.insert(std::pair<std::string, std::string>("REMOTE_HOST", getRemoteHost()));
 	add_server_names(env_map);
-	add_header_field(env_map, "CONTENT_TYPE", "Content-Type: ");
-	add_header_field(env_map, "CONTENT_LENGTH", "Content-Length: ");
-	add_header_field(env_map, "HTTP_ACCEPT", "Accept: ");
-	add_header_field(env_map, "HTTP_ACCEPT_LANGUAGE", "Accept-Language: ");
-	add_header_field(env_map, "HTTP_USER_AGENT", "User-Agent: ");
-	add_header_field(env_map, "HTTP_COOKIE", "Cookie: ");
+	addHeaderField(env_map, "CONTENT_TYPE", "Content-Type: ");
+	addHeaderField(env_map, "CONTENT_LENGTH", "Content-Length: ");
+	addHeaderField(env_map, "HTTP_ACCEPT", "Accept: ");
+	addHeaderField(env_map, "HTTP_ACCEPT_LANGUAGE", "Accept-Language: ");
+	addHeaderField(env_map, "HTTP_USER_AGENT", "User-Agent: ");
+	addHeaderField(env_map, "HTTP_COOKIE", "Cookie: ");
 
 	return (map_to_array(env_map));
 }
@@ -217,13 +215,13 @@ std::string Cgi::get_port(void)
 	return (host_line.substr(index_port + 1, host_line.size() - (index_port + 1) - (host_line[host_line.size() - 1] == '\r')));
 }
 
-std::string Cgi::get_method(void)
+std::string Cgi::getMethod(void)
 {
 	size_t index = this->_header.find(' ');
 	return (this->_header.substr(0, index));
 }
 
-void Cgi::add_path_info(std::map<std::string, std::string> & env_map, std::string root)
+void Cgi::insertPathInfo(std::map<std::string, std::string> & env_map, std::string root)
 {
 	size_t index_start = this->_header.find(' ') + 1;
 	size_t index_end = this->_header.find(' ', index_start);
@@ -240,12 +238,12 @@ void Cgi::add_path_info(std::map<std::string, std::string> & env_map, std::strin
 	env_map.insert(std::pair<std::string, std::string>("PATH_TRANSLATED", path_translated));
 }
 
-std::string Cgi::get_script_relative(std::string root)
+std::string Cgi::getScriptRelative(std::string root)
 {
 	return (this->_file_path.substr(root.size(), this->_file_path.size() - root.size()));
 }
 
-std::string Cgi::get_remote_host(void)
+std::string Cgi::getRemoteHost(void)
 {
 	size_t index_start = this->_header.find("Host: ");
 	size_t index_end = this->_header.find('\n', index_start);
@@ -274,7 +272,7 @@ void Cgi::add_server_names(std::map<std::string, std::string> & env_map)
 	env_map.insert(std::pair<std::string, std::string>("SERVER_NAME", names));
 }
 
-void Cgi::add_header_field(std::map<std::string, std::string> & env_map, std::string key, std::string header_key)
+void Cgi::addHeaderField(std::map<std::string, std::string> & env_map, std::string key, std::string header_key)
 {
 	size_t index_start = this->_header.find(header_key);
 
