@@ -15,8 +15,8 @@ class Location
 		bool _return_sighted;
 		bool _body_sighted;
 
-		void compare_block_info(std::string line);
-		void check_set_default(void);
+		void compareBlockInfo(std::string line);
+		void checkSetDefault(void);
 
 	public:
 		Location(std::string line, std::ifstream & indata, std::string root);

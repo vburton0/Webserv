@@ -32,10 +32,10 @@ void Webserv::init(std::string configFile) {
 				if (!line.compare("}"))
 				{
 					inServerBlock = false;
-					this->servers.back()->check_set_default();
+					this->servers.back()->checkSetDefault();
 				}
 				else
-					this->servers.back()->compare_block_info(line, openFile);
+					this->servers.back()->compareBlockInfo(line, openFile);
 			}
 			else if (line[0] != '#')
 				throw Webserv::InvalidFileContentException();
@@ -49,7 +49,7 @@ void Webserv::init(std::string configFile) {
 	std::set<int> ports;
 	size_t number_of_ports = 0;
 	for (std::list<Server *>::iterator it = this->servers.begin(); it != this->servers.end(); it++)
-		(*it)->add_ports(ports, &number_of_ports);
+		(*it)->addPorts(ports, &number_of_ports);
 
 
 }

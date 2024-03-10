@@ -116,7 +116,7 @@ std::list<Server> Server::parseConfigFile(const std::string& filename) {
 }
 
 // Wacthout ///////////////////////////////
-void Server::check_set_default(void)
+void Server::checkSetDefault(void)
 {
 	if (this->ports.empty() || this->_root.empty())
 		throw Server::IncompleteServerException();
@@ -152,7 +152,7 @@ void Server::check_set_default(void)
 	}
 }
 
-void Server::compare_block_info(std::string line, std::ifstream & indata)
+void Server::compareBlockInfo(std::string line, std::ifstream & indata)
 {
 	std::cout << "line: " << line << std::endl;
 	if (!line.compare (0, 9, "location "))
@@ -287,7 +287,7 @@ void Server::compare_block_info(std::string line, std::ifstream & indata)
 	}
 }
 
-void Server::add_ports(std::set<int> &all_ports, size_t *number_of_ports) // Don't understand the point of this
+void Server::addPorts(std::set<int> &all_ports, size_t *number_of_ports) // Don't understand the point of this
 {
 	*number_of_ports += this->ports.size();
 	std::list<int>::iterator it = this->ports.begin();

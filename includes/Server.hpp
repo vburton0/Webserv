@@ -63,11 +63,11 @@ class Server
         void setRoute(const std::string& path, const RouteConfig& route) { routes[path] = route; }
         void setRootDirectory(const std::string& dir) { rootDirectory = dir; }
         void setDefaultFile(const std::string& file) { defaultFile = file; }
-        void add_ports(std::set<int> &all_ports, size_t *number_of_ports);
+        void addPorts(std::set<int> &all_ports, size_t *number_of_ports);
 
         //Copy
-        void check_set_default(void);
-        void compare_block_info(std::string line, std::ifstream & indata);
+        void checkSetDefault(void);
+        void compareBlockInfo(std::string line, std::ifstream & indata);
         void showServerContent(void);
         std::string recvRequest(int flag);
         void sendResponse(const std::string response);

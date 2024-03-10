@@ -32,7 +32,7 @@ Location::Location(std::string line, std::ifstream & onpenFile, std::string root
 		{
 			if (!line.compare("}"))
 			{
-				check_set_default();
+				checkSetDefault();
 				std::cout << "LOCATION: " << this->location << std::endl;
 				return ;
 			}
@@ -40,7 +40,7 @@ Location::Location(std::string line, std::ifstream & onpenFile, std::string root
 			{
 				if (this->_return_sighted)
 					throw Webserv::InvalidFileContentException();
-				compare_block_info(line);
+				compareBlockInfo(line);
 				this->_line_sighted = true;
 			}
 		}
@@ -69,7 +69,7 @@ Location &Location::operator=(const Location & other)
 //                                  Private                                   //
 // ************************************************************************** //
 
-void Location::compare_block_info(std::string line)
+void Location::compareBlockInfo(std::string line)
 {
 	std::cout << "line: " << line << std::endl;
 	if (line[0] == '#')
@@ -184,7 +184,7 @@ void Location::compare_block_info(std::string line)
 	}
 }
 
-void Location::check_set_default(void)
+void Location::checkSetDefault(void)
 {
 	if (!this->_return.empty())
 		return ;
