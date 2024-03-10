@@ -75,11 +75,11 @@ class Server
         std::string checkChunckEncoding(std::string bufstr);
         void analyseRequest(std::string bufstr);
         std::string get_path_from_locations(std::string & loc, int head_offset, std::string method, bool recursive_stop);
-        void dir_listing(DIR *dir);
-        void receive_put_content(std::string bufstr, std::ofstream &outfile, size_t expected_size, std::string content);
-        void send_method_error(std::vector<std::string> methods);
-        void check_for_cgi(std::string header, std::string bufstr, int method_offset, std::string method, std::string saved_root);
-        std::string get_first_index_file(std::string root, std::list<std::string> index_files, bool auto_index);
+        void dirListing(DIR *dir);
+        void handleRequest(std::string bufstr, std::ofstream &outfile, size_t expected_size, std::string content);
+        void sendErrorMethod(std::vector<std::string> methods);
+        void checkForCGI(std::string header, std::string bufstr, int method_offset, std::string method, std::string saved_root);
+        std::string getFirstIndexFile(std::string root, std::list<std::string> index_files, bool auto_index);
 
         // Getters and other utility functions
         const std::string& getHost() const { return host; }

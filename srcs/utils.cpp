@@ -49,7 +49,7 @@ char *ftStrDup(std::string str)
 }
 
 
-void ft_strcat(std::string src, char *dst)
+void ftStrCat(std::string src, char *dst)
 {
 	size_t cpyndex = 0;
 	for (; dst[cpyndex]; cpyndex++);
@@ -58,7 +58,7 @@ void ft_strcat(std::string src, char *dst)
 	dst[cpyndex] = '\0';
 }
 
-void display_special_characters(std::string str)
+void displaySpecialCharacters(std::string str)
 {
 	for (size_t index = 0; index < str.size(); ++index)
 	{
@@ -97,7 +97,7 @@ void display_special_characters(std::string str)
 	std::cout << "EOF" << std::endl;
 }
 
-std::string read_data(std::ifstream &indata)
+std::string readData(std::ifstream &indata)
 {
 	std::string res;
 	std::string line;
@@ -111,7 +111,7 @@ std::string read_data(std::ifstream &indata)
 	return (res);
 }
 
-char **map_to_array(std::map<std::string, std::string> env_map)
+char **mapToArray(std::map<std::string, std::string> env_map)
 {
 	char **ret = new char *[env_map.size() + 1];
 
@@ -123,9 +123,9 @@ char **map_to_array(std::map<std::string, std::string> env_map)
 	{
 		ret[index] = new char[it->first.size() + 1 + it->second.size() + 1];
 		ret[index][0] = '\0';
-		ft_strcat(it->first, ret[index]);
-		ft_strcat("=", ret[index]);
-		ft_strcat(it->second, ret[index]);
+		ftStrCat(it->first, ret[index]);
+		ftStrCat("=", ret[index]);
+		ftStrCat(it->second, ret[index]);
 	}
 	ret[index] = NULL;
 	return (ret);
@@ -141,7 +141,7 @@ std::string getBody(std::string bufstr)
 }
 
 
-int check_http_version(std::string bufstr)
+int checkHttpVersion(std::string bufstr)
 {
 	size_t index = bufstr.find("\r\n");
 	if (index == std::string::npos || index < 8)
@@ -149,7 +149,7 @@ int check_http_version(std::string bufstr)
 	return (bufstr.compare(index - 8, 8, "HTTP/1.1"));
 }
 
-int check_correct_host(std::string bufstr, std::list<std::string> server_names)
+int checkCorrectHost(std::string bufstr, std::list<std::string> server_names)
 {
 	size_t index = bufstr.find("Host: ");
 	if (index == std::string::npos)
@@ -168,7 +168,7 @@ int check_correct_host(std::string bufstr, std::list<std::string> server_names)
 	return (bufstr.compare(index + 6, 9, "localhost") && bufstr.compare(index + 6, 9, "127.0.0.1"));
 }
 
-int check_header_names(std::string bufstr)
+int checkHTTPHeaderFormat(std::string bufstr)
 {
 	size_t index = bufstr.find("\r\n");
 	while (index != std::string::npos)
@@ -196,7 +196,7 @@ int check_header_names(std::string bufstr)
 	return (0);
 }
 
-std::string get_last_word(std::string str)
+std::string getLastWord(std::string str)
 {
     size_t index = str.rfind('/');
     if (index == std::string::npos)
@@ -205,7 +205,7 @@ std::string get_last_word(std::string str)
         return str.substr(index + 1);
 }
 
-std::string GET_content_type(std::string file)
+std::string GetContentType(std::string file)
 {
     size_t index = file.rfind('.');
     if (index == std::string::npos)

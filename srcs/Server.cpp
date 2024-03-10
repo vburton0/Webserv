@@ -381,7 +381,7 @@ void Server::sendError(int err_code, std::string errstr)
 		std::ifstream newdata(file_abs_path.c_str());
 		if (!newdata.is_open())
 			goto SEND;
-		std::string file_content = read_data(newdata);
+		std::string file_content = readData(newdata);
 		std::ostringstream content_length;
 
 		content_length << file_content.size();
@@ -409,7 +409,7 @@ std::string Server::checkChunckEncoding(std::string bufstr)
 	while (valread && buffer[0] != '0')
 	{
 		bufstr += buffer;
-		display_special_characters(buffer);
+		displaySpecialCharacters(buffer);
 		// sendError(this->socketFd, 100, "100 Continue");
 		valread = recv(this->socketFd, buffer, BUFFER_SIZE, 0);
 		if (valread == -1)
@@ -430,11 +430,11 @@ void Server::analyseRequest(std::string bufstr)
 	}
 	std::string content;
 	// std::cout << bufstr.size() << ": " << bufstr << std::endl;
-	display_special_characters(bufstr); //used for debug because /r present in buffer
+	displaySpecialCharacters(bufstr); //used for debug because /r present in buffer
 
-	if (check_http_version(bufstr))
+	if (checkHttpVersion(bufstr))
 		sendError(505, "505 HTTP Version Not Supported");
-	if (check_correct_host(bufstr, this->_serverNames) || check_header_names(bufstr))
+	if (checkCorrectHost(bufstr, this->_serverNames) || checkHTTPHeaderFormat(bufstr))
 		sendError(400, "400 Bad Request");
 	if (!bufstr.compare(0, 4, "GET ") || !bufstr.compare(0, 5, "HEAD "))
 	{
@@ -455,10 +455,10 @@ void Server::analyseRequest(std::string bufstr)
 		
 		DIR *dir = opendir(file_abs_path.c_str());
 		if (dir != NULL)
-			dir_listing(dir);
+			dirListing(dir);
 
-		content = "HTTP/1.1 200 OK\nContent-Type: " + GET_content_type(file_abs_path) + "\nContent-Length: ";
-		std::string file_content = read_data(indata);
+		content = "HTTP/1.1 200 OK\nContent-Type: " + GetContentType(file_abs_path) + "\nContent-Length: ";
+		std::string file_content = readData(indata);
 
 		std::ostringstream content_length;
 		content_length << file_content.size();
@@ -508,7 +508,7 @@ void Server::analyseRequest(std::string bufstr)
 				sendResponse("100 Continue");
 				body = recvRequest(0);	
 			}
-			receive_put_content(body, outdata, expected_size, content);
+			handleRequest(body, outdata, expected_size, content);
 			outdata.close();
 		}
 		else
@@ -583,7 +583,7 @@ std::string Server::get_path_from_locations(std::string & loc, int method_offset
 	}
 	if (!recursive_stop && match_size && std::find(this->_locations[match_index]->methods.begin(), this->_locations[match_index]->methods.end(), method) == this->_locations[match_index]->methods.end())
 	{
-		send_method_error(this->_locations[match_index]->methods);
+		sendErrorMethod(this->_locations[match_index]->methods);
 		throw Webserv::QuickerReturnException();
 	}
 	if (this->actualBodySize == std::string::npos)
@@ -598,9 +598,9 @@ std::string Server::get_path_from_locations(std::string & loc, int method_offset
 	if (!loc.compare(4 + method_offset, 2, "/ ") || !loc.compare(4 + method_offset, 1, " "))
 	{
 		if (match_index_files.empty())
-			ret = get_first_index_file(ret, this->_indexFile, auto_index && !method.compare("GET"));
+			ret = getFirstIndexFile(ret, this->_indexFile, auto_index && !method.compare("GET"));
 		else
-			ret = get_first_index_file(ret, match_index_files, auto_index && !method.compare("GET"));
+			ret = getFirstIndexFile(ret, match_index_files, auto_index && !method.compare("GET"));
 	}
 	else if (!loc.compare(4 + method_offset, 1, "/"))
 		ret += loc.substr(5 + method_offset, loc.find(" ", 5 + method_offset) - (5 + method_offset));
@@ -609,15 +609,15 @@ std::string Server::get_path_from_locations(std::string & loc, int method_offset
 	loc = loc.substr(0, 4 + method_offset) + ret + loc.substr(loc.find(' ', 4 + method_offset));
 	if (recursive_stop)
 		return ("");
-	check_for_cgi(loc, ret, 4 + method_offset, method, saved_root);
+	checkForCGI(loc, ret, 4 + method_offset, method, saved_root);
 	if (match_size && !this->_locations[match_index]->cgi.empty())
 		Cgi(loc, this->_locations[match_index]->root + this->_locations[match_index]->cgi, this, saved_root);
 	return (ret);
 }
 
-void Server::dir_listing(DIR *dir)
+void Server::dirListing(DIR *dir)
 {
-	std::string body = "<!DOCTYPE html>\n<html>\n <body>\n<center>\n	<div>\n		<H1>Index of " + get_last_word(this->_initial_loc) + "</H1>\n	</div>\n";
+	std::string body = "<!DOCTYPE html>\n<html>\n <body>\n<center>\n	<div>\n		<H1>Index of " + getLastWord(this->_initial_loc) + "</H1>\n	</div>\n";
 	struct dirent *dent;
 	std::string dot = ".";
 
@@ -642,7 +642,7 @@ void Server::dir_listing(DIR *dir)
 	throw Webserv::QuickerReturnException();
 }
 
-void Server::send_method_error(std::vector<std::string> methods)
+void Server::sendErrorMethod(std::vector<std::string> methods)
 {
 	std::string content = "405 Method Not Allowed\nAllow: ";
 	std::vector<std::string>::iterator it = methods.begin();
@@ -657,7 +657,7 @@ void Server::send_method_error(std::vector<std::string> methods)
 	sendError(405, content);
 }
 
-void Server::receive_put_content(std::string body, std::ofstream &outfile, size_t expected_size, std::string content)
+void Server::handleRequest(std::string body, std::ofstream &outfile, size_t expected_size, std::string content)
 {
 	std::cout << "body size: " << body.size() << ", selected max_body_size: " << this->actualBodySize << std::endl;
 	// std::cout << body << std::endl;
@@ -675,14 +675,14 @@ void Server::receive_put_content(std::string body, std::ofstream &outfile, size_
 }
 
 /* look for "/cgi/" in file_path and call cgi if found */
-void Server::check_for_cgi(std::string header, std::string file_path, int method_offset, std::string method, std::string saved_root)
+void Server::checkForCGI(std::string header, std::string file_path, int method_offset, std::string method, std::string saved_root)
 {
 	size_t search = file_path.find("/cgi/");
 	if (search == std::string::npos)
 		return ;
 	// std::cout << "/cgi/ found in path" << std::endl;
 	// std::cout << std::endl;
-	// display_special_characters(header);
+	// displaySpecialCharacters(header);
 	// std::cout << std::endl << "cgi_path: " << file_path << std::endl;
 
 	size_t end = file_path.find('/', search + 5);
@@ -706,7 +706,7 @@ void Server::check_for_cgi(std::string header, std::string file_path, int method
 	Cgi(header, file_path, this, saved_root);
 }
 
-std::string Server::get_first_index_file(std::string root, std::list<std::string> index_files, bool auto_index)
+std::string Server::getFirstIndexFile(std::string root, std::list<std::string> index_files, bool auto_index)
 {
 	std::list<std::string>::iterator it = index_files.begin();
 	std::list<std::string>::iterator ite = index_files.end();

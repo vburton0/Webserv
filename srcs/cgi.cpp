@@ -5,7 +5,7 @@ Cgi::Cgi(std::string header, std::string file_path, Server *serv, std::string sa
 		: _header(header), _file_path(file_path), _serv(serv)
 {
 	std::cout << "Constructor of cgi called" << std::endl << std::endl;
-	// display_special_characters(header);
+	// displaySpecialCharacters(header);
 	// std::cout << std::endl << "cgi_path: " << file_path << std::endl;
 
 	//check if body received is of correct size
@@ -200,7 +200,7 @@ char **Cgi::setEnv(std::string saved_root)
 	addHeaderField(env_map, "HTTP_USER_AGENT", "User-Agent: ");
 	addHeaderField(env_map, "HTTP_COOKIE", "Cookie: ");
 
-	return (map_to_array(env_map));
+	return (mapToArray(env_map));
 }
 
 std::string Cgi::get_port(void)
