@@ -74,7 +74,7 @@ class Server
         void sendError(int err_code, std::string errstr);
         std::string checkChunckEncoding(std::string bufstr);
         void analyseRequest(std::string bufstr);
-        std::string get_path_from_locations(std::string & loc, int head_offset, std::string method, bool recursive_stop);
+        std::string getPathFromLocations(std::string & loc, int head_offset, std::string method, bool recursive_stop);
         void dirListing(DIR *dir);
         void handleRequest(std::string bufstr, std::ofstream &outfile, size_t expected_size, std::string content);
         void sendErrorMethod(std::vector<std::string> methods);

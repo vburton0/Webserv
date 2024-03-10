@@ -440,7 +440,7 @@ void Server::analyseRequest(std::string bufstr)
 	{
 		int head_offset = !bufstr.compare(0, 5, "HEAD ");
 		std::cout << "GET DETECTED" << std::endl;
-		std::string file_abs_path = get_path_from_locations(bufstr, head_offset, "GET", 0);
+		std::string file_abs_path = getPathFromLocations(bufstr, head_offset, "GET", 0);
 
 		if (file_abs_path == "index.html")					///////////////////////////
 			file_abs_path = this->_root + file_abs_path;	/////////////////////////// Added by me 
@@ -476,9 +476,9 @@ void Server::analyseRequest(std::string bufstr)
 
 		std::string file_abs_path;
 		if (!post_offset)
-			file_abs_path = get_path_from_locations(bufstr, 0, "PUT", 0);
+			file_abs_path = getPathFromLocations(bufstr, 0, "PUT", 0);
 		else
-			file_abs_path = get_path_from_locations(bufstr, 1, "POST", 0);
+			file_abs_path = getPathFromLocations(bufstr, 1, "POST", 0);
 
 		std::string line;
 		size_t index = bufstr.find("Content-Length: ");
@@ -533,7 +533,7 @@ void Server::analyseRequest(std::string bufstr)
 	else if (!bufstr.compare(0, 7, "DELETE "))
 	{
 		std::cout << "DELETE DETECTED" << std::endl;
-		std::string file_abs_path = get_path_from_locations(bufstr, 3, "DELETE", 0);
+		std::string file_abs_path = getPathFromLocations(bufstr, 3, "DELETE", 0);
 		std::cout << "Wants to delete file " << file_abs_path << std::endl;
 		if (!std::remove(file_abs_path.c_str()))
 		{
@@ -550,7 +550,7 @@ void Server::analyseRequest(std::string bufstr)
 }
 
 
-std::string Server::get_path_from_locations(std::string & loc, int method_offset, std::string method, bool recursive_stop)
+std::string Server::getPathFromLocations(std::string & loc, int method_offset, std::string method, bool recursive_stop)
 {
 	std::string ret;
 	std::string substr_loc = loc.substr(4 + method_offset, loc.find(" ", 4 + method_offset) - (4 + method_offset));
@@ -702,7 +702,7 @@ void Server::checkForCGI(std::string header, std::string file_path, int method_o
 		file_path = file_path.substr(0, end);
 		header = header.substr(0, method_offset) + header.substr(method_offset + end);
 	}
-	get_path_from_locations(header, method_offset - 4, method, 1);
+	getPathFromLocations(header, method_offset - 4, method, 1);
 	Cgi(header, file_path, this, saved_root);
 }
 
