@@ -1,7 +1,5 @@
 #include "CGI.hpp"
 
-# include ".h"
-
 
 Cgi::Cgi(const std::string& uri, const std::string& requestBody, int clientSocket, const std::string& method)
 : _method(method), _uri(uri), _requestBody(requestBody), _clientSocket(clientSocket) {}
