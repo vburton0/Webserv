@@ -17,7 +17,7 @@ if "file" in form:
     if fileitem.filename:
         # Déterminez le chemin où vous voulez sauvegarder le fichier
         # Assurez-vous que ce dossier existe et est accessible en écriture par le serveur web
-        upload_path = "/ressources"
+        upload_path = "/uploadedFile"
         filepath = os.path.join(upload_path, fileitem.filename)
 
         # Ouvrez le fichier en écriture binaire
@@ -27,9 +27,9 @@ if "file" in form:
         message = f"Le fichier '{fileitem.filename}' a été uploadé avec succès."
 
     else:
-        message = "Aucun fichier n'a été uploadé."
+        message = "Aucun fichier n'a été uploadé. 1"
 else:
-    message = "Aucun fichier n'a été uploadé."
+    message = "Aucun fichier n'a été uploadé. 2"
 
 print(f"""
 <!DOCTYPE html>
