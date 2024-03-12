@@ -31,8 +31,6 @@ Cgi::Cgi(std::string header, std::string file_path, Server *serv, std::string sa
 	}
 	if (expected_size != std::string::npos)
 	{
-		if (expected_size > serv->actualBodySize * 1000000)
-			serv->sendError(413, "413 Payload Too Large");
 		std::string body = getBody(header);
 		std::cout << "body size: " << body.size() << " vs expected size: " << expected_size << std::endl;
 		if (body.size() != expected_size)
