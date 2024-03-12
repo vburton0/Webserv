@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
+
 import cgi
 import os
 
+# HTTP header to indicate the response is HTML
+print("HTTP/1.1 200 OK")
 print("Content-Type: text/html\n")
 
 form = cgi.FieldStorage()
