@@ -57,8 +57,8 @@
     </style>
 </head>
 <body>
-    <form action="/cgi/upload.cgi" method="POST">
-        <input type="file" multiple>
+    <form action="/cgi/upload.cgi" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" multiple>
         <p>Drag your files here or click in this area.</p>
         <button type="submit">Upload</button>
     </form>
