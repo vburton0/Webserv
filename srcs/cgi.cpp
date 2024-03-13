@@ -33,8 +33,8 @@ Cgi::Cgi(std::string header, std::string file_path, Server *serv, std::string sa
 	{
 		std::string body = getBody(header);
 		std::cout << "body size: " << body.size() << " vs expected size: " << expected_size << std::endl;
-		if (body.size() != expected_size)
-			serv->sendError(412, "412 Precondition Failed");
+		// if (body.size() != expected_size)
+		// 	serv->sendError(412, "412 Precondition Failed"); //TODO problemmmmmmmmmmmm
 		write(body_fd[1], body.c_str(), body.size());
 	}
 

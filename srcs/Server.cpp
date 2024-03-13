@@ -349,6 +349,7 @@ std::string Server::recvRequest(int check_header)
 	{
 		sendResponse("100 Continue");
 		valread = recv(this->socketFd, buffer, BUFFER_SIZE, 0);
+		std::cout << "\n\n\nnvalread: \n\n\n\n" << valread << std::endl;
 		if (valread == -1)
 			sendError(500, "500 Internal Server Error");
 		else if (valread)
@@ -356,7 +357,6 @@ std::string Server::recvRequest(int check_header)
 			buffer[valread] = '\0';
 			bufstr += buffer;
 		}
-		// std::cout << "valread: " << valread << std::endl;
 	}
 	if (check_header)
 		bufstr = checkChunckEncoding(bufstr);

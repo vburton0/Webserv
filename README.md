@@ -13,6 +13,10 @@
 - PATCH : Utilisée pour appliquer des modifications partielles à une ressource. Cela permet de mettre à jour seulement certaines parties de la ressource sans avoir à renvoyer l'ensemble des données.
 
 
+## Configuration file.
+
+
+
 
 
 

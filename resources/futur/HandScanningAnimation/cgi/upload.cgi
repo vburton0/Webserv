@@ -17,7 +17,7 @@ if "file" in form:
     if fileitem.filename:
         # Déterminez le chemin où vous voulez sauvegarder le fichier
         # Assurez-vous que ce dossier existe et est accessible en écriture par le serveur web
-        upload_path = "/uploadedFile"
+        upload_path = "resources/futur/HandScanningAnimation/uploadedFile"
         filepath = os.path.join(upload_path, fileitem.filename)
 
         # Ouvrez le fichier en écriture binaire
