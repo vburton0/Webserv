@@ -339,28 +339,56 @@ void Server::showServerContent(void) // Watchout All the iterator should be simp
 
 std::string Server::recvRequest(int check_header)
 {
-	std::string bufstr;
-	char buffer[BUFFER_SIZE + 1] = {0};
-	ssize_t valread = recv(this->socketFd, buffer, BUFFER_SIZE, 0);
-	if (valread == -1)
-		sendError(500, "500 Internal Server Error");
-	bufstr += buffer;
-	while (valread == BUFFER_SIZE) //TODO what if request of exactly BUFFER_SIZE bytes
-	{
-		sendResponse("100 Continue");
-		valread = recv(this->socketFd, buffer, BUFFER_SIZE, 0);
-		std::cout << "\n\n\nnvalread: \n\n\n\n" << valread << std::endl;
-		if (valread == -1)
-			sendError(500, "500 Internal Server Error");
-		else if (valread)
-		{
-			buffer[valread] = '\0';
-			bufstr += buffer;
-		}
-	}
+	// std::string bufstr;
+	// char buffer[BUFFER_SIZE + 1] = {0};
+	// ssize_t valread = recv(this->socketFd, buffer, BUFFER_SIZE, 0);
+	// if (valread == -1)
+	// 	sendError(500, "500 Internal Server Error");
+	// bufstr += buffer;
+	// while (valread == BUFFER_SIZE) //TODO what if request of exactly BUFFER_SIZE bytes
+	// {
+	// 	sendResponse("100 Continue");
+	// 	valread = recv(this->socketFd, buffer, BUFFER_SIZE, 0);
+	// 	std::cout << "\n\n\nnvalread: \n\n\n\n" << valread << std::endl;
+	// 	if (valread == -1)
+	// 		sendError(500, "500 Internal Server Error");
+	// 	else if (valread)
+	// 	{
+	// 		buffer[valread] = '\0';
+	// 		bufstr += buffer;
+	// 	}
+	// }
+	// if (check_header)
+	// 	bufstr = checkChunckEncoding(bufstr);
+	// return (bufstr);
+
+	std::string request;
+    char buffer[4096]; // Consider using a buffer size that fits your needs
+    ssize_t nread;
+    size_t content_length = 0; // You'll need to parse this from the headers
+
+    // Initial read to get headers and possibly part of the body
+    nread = recv(this->socketFd, buffer, sizeof(buffer), 0);
+    if (nread > 0) {
+        request.append(buffer, nread);
+        // Parse headers to find Content-Length and set content_length accordingly
+        // This is a simplified approach; you'll need to implement actual header parsing
+        size_t pos = request.find("Content-Length: ");
+        if (pos != std::string::npos) {
+            size_t end = request.find("\r\n", pos);
+            std::string cl = request.substr(pos + 16, end - (pos + 16));
+            content_length = std::stoi(cl);
+        }
+    }
+
+    // Keep reading until all data is received based on Content-Length
+    while (request.length() < content_length && (nread = recv(this->socketFd, buffer, sizeof(buffer), 0)) > 0) {
+        request.append(buffer, nread);
+    }
+
 	if (check_header)
-		bufstr = checkChunckEncoding(bufstr);
-	return (bufstr);
+		request = checkChunckEncoding(request);
+    return request;
 }
 
 

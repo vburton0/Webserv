@@ -33,9 +33,26 @@ Cgi::Cgi(std::string header, std::string file_path, Server *serv, std::string sa
 	{
 		std::string body = getBody(header);
 		std::cout << "body size: " << body.size() << " vs expected size: " << expected_size << std::endl;
-		// if (body.size() != expected_size)
-		// 	serv->sendError(412, "412 Precondition Failed"); //TODO problemmmmmmmmmmmm
-		write(body_fd[1], body.c_str(), body.size());
+		if (body.size() != expected_size)
+			serv->sendError(412, "412 Precondition Failed");
+
+		const size_t CHUNK_SIZE = 1024; // Adjust the chunk size as needed
+		size_t bodyLength = body.size();
+		const char* dataPtr = body.c_str();
+
+		for (size_t offset = 0; offset < bodyLength; offset += CHUNK_SIZE) {
+			size_t writeSize = std::min(CHUNK_SIZE, bodyLength - offset);
+			ssize_t written = write(body_fd[1], dataPtr + offset, writeSize);
+
+			if (written == -1) {
+				// Handle error (e.g., log it, close file descriptors, exit)
+				perror("write to CGI script failed");
+				close(body_fd[0]);
+				close(body_fd[1]);
+				exit(1); // Or handle the error as appropriate for your application
+			}
+		}
+		std::cout << "on the go ffffff" << std::endl;
 	}
 
 	//fork and call cgi

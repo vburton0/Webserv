@@ -13,7 +13,7 @@ form = cgi.FieldStorage()
 if "file" in form:
     fileitem = form["file"]
 
-    # Vérifiez si le fichier a été uploadé
+    # Vérifiez si le fichier a été upswwwloadé
     if fileitem.filename:
         # Déterminez le chemin où vous voulez sauvegarder le fichier
         # Assurez-vous que ce dossier existe et est accessible en écriture par le serveur web
@@ -22,8 +22,12 @@ if "file" in form:
 
         # Ouvrez le fichier en écriture binaire
         with open(filepath, 'wb') as fout:
-            fout.write(fileitem.file.read())
-        
+            while True:
+                chunk = fileitem.file.read(1024)  # Read in chunks of 1024 bytes
+                if not chunk:
+                    break  # Exit the loop when no more data is read
+                fout.write(chunk)
+
         message = f"Le fichier '{fileitem.filename}' a été uploadé avec succès."
 
     else:
