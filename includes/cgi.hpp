@@ -6,6 +6,7 @@
 # include <unistd.h>
 # include <map>
 # include <sys/wait.h>
+# include <fcntl.h>
 # include "utils.hpp"
 # include "Server.hpp"
 

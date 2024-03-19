@@ -5,13 +5,6 @@ Cgi::Cgi(std::string header, std::string file_path, Server *serv, std::string sa
 		: _header(header), _file_path(file_path), _serv(serv)
 {
 	std::cout << "Constructor of cgi called" << std::endl << std::endl;
-	// displaySpecialCharacters(header);
-	// std::cout << std::endl << "cgi_path: " << file_path << std::endl;
-
-	//check if body received is of correct size
-	//and send said body to std::cout after duping it
-	// if GET + query => '?' in URL, which we put in QUERY_STRING env var
-	// if POST + body, print it to std::in of cgi
 	int body_fd[2];
 	if (pipe(body_fd) == -1)
 		serv->sendError(500, "500 Internal Server Error");

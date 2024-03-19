@@ -15,7 +15,10 @@
 
 ## Configuration file.
 
+## Probleme rencontré
 
+- Possibilité de seulement upload des fichier en dessous de +- 65000 bytes parce que les Pipes ont un buffer size limité. 
+   - Solution possible : Chunk writting, pour pouvoir écrire tout le body de la request et donc tout le file que l'on veut upload. Il faut aussi faire que le Fd soit non blockant pour qu'il n'y ai pas de probleme.
 
 
 

@@ -28,21 +28,12 @@ if "file" in form:
                     break  # Exit the loop when no more data is read
                 fout.write(chunk)
 
-        message = f"Le fichier '{fileitem.filename}' a été uploadé avec succès."
+        with open("resources/futur/HandScanningAnimation/uploadGood.html", 'r') as fichier_html:
+            print(fichier_html.read())
 
     else:
-        message = "Aucun fichier n'a été uploadé. 1"
+       with open("resources/futur/HandScanningAnimation/uploadBad.html", 'r') as fichier_html:
+            print(fichier_html.read())
 else:
-    message = "Aucun fichier n'a été uploadé. 2"
-
-print(f"""
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Upload de Fichier CGI</title>
-</head>
-<body>
-    <p>{message}</p>
-</body>
-</html>
-""")
+   with open("resources/futur/HandScanningAnimation/uploadBad.html", 'r') as fichier_html:
+            print(fichier_html.read())
