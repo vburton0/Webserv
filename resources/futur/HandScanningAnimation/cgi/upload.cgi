@@ -3,37 +3,40 @@
 import cgi
 import os
 
-# HTTP header to indicate the response is HTML
 print("HTTP/1.1 200 OK")
 print("Content-Type: text/html\n")
 
 form = cgi.FieldStorage()
 
-# Vérifiez si le formulaire a été soumis
+upload_path = "resources/futur/HandScanningAnimation/uploadedFiles"
+if not os.path.exists(upload_path):
+    os.makedirs(upload_path)
+
+# Check if the form has been submitted
 if "file" in form:
     fileitem = form["file"]
-
-    # Vérifiez si le fichier a été upswwwloadé
+    # Check if the file has been uploaded
     if fileitem.filename:
-        # Déterminez le chemin où vous voulez sauvegarder le fichier
-        # Assurez-vous que ce dossier existe et est accessible en écriture par le serveur web
-        upload_path = "resources/futur/HandScanningAnimation/uploadedFile"
         filepath = os.path.join(upload_path, fileitem.filename)
-
-        # Ouvrez le fichier en écriture binaire
+        # Open the file in binary write mode
         with open(filepath, 'wb') as fout:
             while True:
                 chunk = fileitem.file.read(1024)  # Read in chunks of 1024 bytes
                 if not chunk:
                     break  # Exit the loop when no more data is read
                 fout.write(chunk)
-
-        with open("resources/futur/HandScanningAnimation/uploadGood.html", 'r') as fichier_html:
-            print(fichier_html.read())
-
+        print("<p>The file '{}' has been uploaded successfully.</p>".format(fileitem.filename))
     else:
-       with open("resources/futur/HandScanningAnimation/uploadBad.html", 'r') as fichier_html:
-            print(fichier_html.read())
+        print("<p>No file was uploaded.</p>")
 else:
-   with open("resources/futur/HandScanningAnimation/uploadBad.html", 'r') as fichier_html:
-            print(fichier_html.read())
+    print("<p>No file was uploaded.</p>")
+
+# List all files in the upload directory
+files = os.listdir(upload_path)
+print("<h2>Available Files:</h2>")
+print("<ul>")
+for f in files:
+    file_path = os.path.join(upload_path, f)
+    file_path = "uploadedFiles/down.jpg"
+    print('<li><a href="{}">{}</a></li>'.format(file_path, f))
+print("</ul>")
