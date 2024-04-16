@@ -584,7 +584,7 @@ std::string Server::getPathFromLocations(std::string & loc, int methodOffset, st
 	std::string substr_loc = loc.substr(4 + methodOffset, loc.find(" ", 4 + methodOffset) - (4 + methodOffset));
 	size_t match_size = 0;
 	size_t match_index;
-	bool auto_index;
+	bool autoIndex;
 	std::list<std::string> match_index_files;
 	for (size_t loc_index = 0; loc_index < this->_locations.size(); loc_index++)
 	{
@@ -598,9 +598,9 @@ std::string Server::getPathFromLocations(std::string & loc, int methodOffset, st
 			{
 				match_size = loc_size;
 				match_index = loc_index;
-				match_index_files = this->_locations[loc_index]->index_files;
-				auto_index = this->_locations[loc_index]->auto_index;
-				this->actualBodySize = this->_locations[loc_index]->body_size;
+				match_index_files = this->_locations[loc_index]->indexFiles;
+				autoIndex = this->_locations[loc_index]->autoIndex;
+				this->actualBodySize = this->_locations[loc_index]->bodySize;
 				if (this->_locations[loc_index]->suffixed)
 				{
 					match_size = 1;
@@ -626,9 +626,9 @@ std::string Server::getPathFromLocations(std::string & loc, int methodOffset, st
 	if (!loc.compare(4 + methodOffset, 2, "/ ") || !loc.compare(4 + methodOffset, 1, " "))
 	{
 		if (match_index_files.empty())
-			ret = getFirstIndexFile(ret, this->_indexFile, auto_index && !method.compare("GET"));
+			ret = getFirstIndexFile(ret, this->_indexFile, autoIndex && !method.compare("GET"));
 		else
-			ret = getFirstIndexFile(ret, match_index_files, auto_index && !method.compare("GET"));
+			ret = getFirstIndexFile(ret, match_index_files, autoIndex && !method.compare("GET"));
 	}
 	else if (!loc.compare(4 + methodOffset, 1, "/"))
 		ret += loc.substr(5 + methodOffset, loc.find(" ", 5 + methodOffset) - (5 + methodOffset));
@@ -704,8 +704,8 @@ void Server::handleRequest(std::string body, std::ofstream &outfile, size_t expe
 
 std::string Server::getFirstIndexFile(std::string root, std::list<std::string> index_files, bool auto_index)
 {
-	std::list<std::string>::iterator it = index_files.begin();
-	std::list<std::string>::iterator ite = index_files.end();
+	std::list<std::string>::iterator it = indexFiles.begin();
+	std::list<std::string>::iterator ite = indexFiles.end();
 	for (; it != ite; it++)
 	{
 		std::string file_abs_path = root + *it;
@@ -716,7 +716,7 @@ std::string Server::getFirstIndexFile(std::string root, std::list<std::string> i
 			return (*it);
 		}
 	}
-	if (auto_index)
+	if (autoIndex)
 	{
 		DIR *dir = opendir(root.c_str());
 		if (dir != NULL)
