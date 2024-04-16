@@ -36,7 +36,6 @@ files = os.listdir(upload_path)
 print("<h2>Available Files:</h2>")
 print("<ul>")
 for f in files:
-    file_path = os.path.join(upload_path, f)
-    file_path = "uploadedFiles/down.jpg"
+    file_path = os.path.join("uploadedFiles/", f)
     print('<li><a href="{}">{}</a></li>'.format(file_path, f))
 print("</ul>")
