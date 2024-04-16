@@ -391,7 +391,6 @@ std::string Server::recvRequest(int check_header)
     return request;
 }
 
-
 void Server::sendResponse(std::string msg)
 {
 	std::cerr << std::endl << " -- status return " << msg << " --" << std::endl;

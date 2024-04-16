@@ -2,7 +2,7 @@
 
 #include "../includes/Location.hpp"
 
-Location::Location(std::string line, std::ifstream & onpenFile, std::string root) : _autoSighted(false),
+Location::Location(std::string line, std::ifstream & openFile, std::string root) : _autoSighted(false),
 	_lineSighted(false), _returnSighted(false), _bodySighted(false), root(root), bodySize(std::string::npos),
 	autoIndex(true), suffixed(false)
 {
@@ -24,9 +24,9 @@ Location::Location(std::string line, std::ifstream & onpenFile, std::string root
 		if (this->location[0] != '.' || !this->location.compare(0, 2, "."))
 			throw Webserv::InvalidFileContentException();
 	}
-	while (!onpenFile.eof())
+	while (!openFile.eof())
 	{
-		std::getline(onpenFile, line);
+		std::getline(openFile, line);
 		line = trimSpaceComments(line);
 		if (!line.empty())
 		{

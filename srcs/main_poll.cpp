@@ -22,7 +22,6 @@ void parseHttpRequest(const std::string& request, std::string& method, std::stri
     std::istringstream requestLineStream(line);
     requestLineStream >> method >> uri >> httpVersion;
 
-    std::cout << "\n\n\n\n\nRequest:\n" << request << "\n\n\n\n\n" << std::endl;  // DEBUG
     // Read headers
     while (std::getline(requestStream, line) && line != "\r") {
         std::istringstream headerLineStream(line);
@@ -36,7 +35,6 @@ void parseHttpRequest(const std::string& request, std::string& method, std::stri
         }
     }
 }
-
 
 int main(int ac, char **av) {
     // Config File and args handler

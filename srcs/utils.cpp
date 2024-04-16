@@ -44,7 +44,7 @@ int isErrorCode(int code)
 char *ftStrDup(std::string str)
 {
     char *dup = new char[str.size() + 1];
-    strcpy(dup, str.c_str());  // Not sure I can Use it
+    strcpy(dup, str.c_str());
     return dup;
 }
 
@@ -78,10 +78,6 @@ void displaySpecialCharacters(std::string str)
 			case '\t':
 				std::cout << "\\t";
 				break;
-
-			// TODO: Add other C character escapes here.  See:
-			// <https://en.wikipedia.org/wiki/Escape_sequences_in_C#Table_of_escape_sequences>
-
 			default:
 				if (isprint(c))
 				{
@@ -154,9 +150,9 @@ int checkCorrectHost(std::string bufstr, std::list<std::string> server_names)
 	size_t index = bufstr.find("Host: ");
 	if (index == std::string::npos)
 		return (1);
-	// size_t multiple_host = bufstr.find("Host: ", index + 1);    ///// Watchout delete check if multiple host
-	// if (multiple_host != std::string::npos)
-	// 	return (1);
+	size_t multiple_host = bufstr.find("Host: ", index + 1);    ///// Watchout delete check if multiple host
+	if (multiple_host != std::string::npos)
+		return (1);
 	
 	std::list<std::string>::iterator it = server_names.begin();
 	std::list<std::string>::iterator ite = server_names.end();
