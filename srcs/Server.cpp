@@ -470,8 +470,8 @@ void Server::analyseRequest(std::string bufstr)
 		std::cout << "GET DETECTED" << std::endl;
 		std::string file_abs_path = getPathFromLocations(bufstr, head_offset, "GET", 0);
 
-		if (file_abs_path == "index.html")					///////////////////////////
-			file_abs_path = this->_root + file_abs_path;	/////////////////////////// Added by me 
+		if (file_abs_path == "index.html")
+			file_abs_path = this->_root + file_abs_path;
 		size_t qmark = file_abs_path.find('?');
 		if (qmark != std::string::npos)
 			file_abs_path = file_abs_path.substr(0, qmark);
@@ -578,10 +578,10 @@ void Server::analyseRequest(std::string bufstr)
 }
 
 
-std::string Server::getPathFromLocations(std::string & loc, int method_offset, std::string method, bool recursive_stop)
+std::string Server::getPathFromLocations(std::string & loc, int methodOffset, std::string method, bool recursive_stop)
 {
 	std::string ret;
-	std::string substr_loc = loc.substr(4 + method_offset, loc.find(" ", 4 + method_offset) - (4 + method_offset));
+	std::string substr_loc = loc.substr(4 + methodOffset, loc.find(" ", 4 + methodOffset) - (4 + methodOffset));
 	size_t match_size = 0;
 	size_t match_index;
 	bool autoIndex;
@@ -621,25 +621,25 @@ std::string Server::getPathFromLocations(std::string & loc, int method_offset, s
 	else
 		ret = this->_locations[match_index]->root;
 	this->_initial_loc = substr_loc;
-	std::string saved_root = ret;
-	loc = loc.substr(0, 4 + method_offset) + loc.substr(4 + method_offset + match_size);
-	if (!loc.compare(4 + method_offset, 2, "/ ") || !loc.compare(4 + method_offset, 1, " "))
+	std::string savedRoot = ret;
+	loc = loc.substr(0, 4 + methodOffset) + loc.substr(4 + methodOffset + match_size);
+	if (!loc.compare(4 + methodOffset, 2, "/ ") || !loc.compare(4 + methodOffset, 1, " "))
 	{
 		if (match_index_files.empty())
 			ret = getFirstIndexFile(ret, this->_indexFile, autoIndex && !method.compare("GET"));
 		else
 			ret = getFirstIndexFile(ret, match_index_files, autoIndex && !method.compare("GET"));
 	}
-	else if (!loc.compare(4 + method_offset, 1, "/"))
-		ret += loc.substr(5 + method_offset, loc.find(" ", 5 + method_offset) - (5 + method_offset));
+	else if (!loc.compare(4 + methodOffset, 1, "/"))
+		ret += loc.substr(5 + methodOffset, loc.find(" ", 5 + methodOffset) - (5 + methodOffset));
 	else
-		ret += loc.substr(4 + method_offset, loc.find(" ", 4 + method_offset) - (4 + method_offset));
-	loc = loc.substr(0, 4 + method_offset) + ret + loc.substr(loc.find(' ', 4 + method_offset));
+		ret += loc.substr(4 + methodOffset, loc.find(" ", 4 + methodOffset) - (4 + methodOffset));
+	loc = loc.substr(0, 4 + methodOffset) + ret + loc.substr(loc.find(' ', 4 + methodOffset));
 	if (recursive_stop)
 		return ("");
-	checkForCGI(loc, ret, 4 + method_offset, method, saved_root);
+	ret = checkForCGI(loc, ret, 4 + methodOffset, method, savedRoot);
 	if (match_size && !this->_locations[match_index]->cgi.empty())
-		Cgi(loc, this->_locations[match_index]->root + this->_locations[match_index]->cgi, this, saved_root);
+		Cgi(loc, this->_locations[match_index]->root + this->_locations[match_index]->cgi, this, savedRoot);
 	return (ret);
 }
 
@@ -702,39 +702,7 @@ void Server::handleRequest(std::string body, std::ofstream &outfile, size_t expe
 	sendResponse(content);
 }
 
-/* look for "/cgi/" in file_path and call cgi if found */
-void Server::checkForCGI(std::string header, std::string file_path, int method_offset, std::string method, std::string saved_root)
-{
-	size_t search = file_path.find("/cgi/");
-	if (search == std::string::npos)
-		return ;
-	// std::cout << "/cgi/ found in path" << std::endl;
-	// std::cout << std::endl;
-	// displaySpecialCharacters(header);
-	// std::cout << std::endl << "cgi_path: " << file_path << std::endl;
-
-	size_t end = file_path.find('/', search + 5);
-	if (end == std::string::npos)
-	{
-		size_t end_mark = file_path.find('?', search + 5);
-		if (end_mark == std::string::npos)
-			header = header.substr(0, method_offset) + '/' + header.substr(method_offset + file_path.size());
-		else
-		{
-			file_path = file_path.substr(0, end_mark);
-			header = header.substr(0, method_offset) + header.substr(method_offset + end_mark);
-		}
-	}
-	else
-	{
-		file_path = file_path.substr(0, end);
-		header = header.substr(0, method_offset) + header.substr(method_offset + end);
-	}
-	getPathFromLocations(header, method_offset - 4, method, 1);
-	Cgi(header, file_path, this, saved_root);
-}
-
-std::string Server::getFirstIndexFile(std::string root, std::list<std::string> indexFiles, bool autoIndex)
+std::string Server::getFirstIndexFile(std::string root, std::list<std::string> index_files, bool auto_index)
 {
 	std::list<std::string>::iterator it = indexFiles.begin();
 	std::list<std::string>::iterator ite = indexFiles.end();
@@ -764,6 +732,43 @@ std::string Server::getFirstIndexFile(std::string root, std::list<std::string> i
 
 
 /// end WATCHOUT ////////////////////////////////////////////////
+/* look for "/cgi/" in filePath and call cgi if found */
+std::string Server::checkForCGI(std::string header, std::string filePath, int methodOffset, std::string method, std::string savedRoot)
+{
+	size_t cgiPos = filePath.find("/cgi/");
+    if(cgiPos == std::string::npos) {
+    	return filePath; 
+	}
+	
+	size_t uploadedPos = filePath.find("/uploadedFiles/");
+    if (uploadedPos != std::string::npos) {
+        return filePath.erase(cgiPos, 4);  // Remove the "/cgi" part from the path
+    }
+
+
+	size_t end = filePath.find('/', cgiPos + 5);
+	if (end == std::string::npos)
+	{
+		size_t end_mark = filePath.find('?', cgiPos + 5);
+		if (end_mark == std::string::npos)
+			header = header.substr(0, methodOffset) + '/' + header.substr(methodOffset + filePath.size());
+		else
+		{
+			filePath = filePath.substr(0, end_mark);
+			header = header.substr(0, methodOffset) + header.substr(methodOffset + end_mark);
+		}
+	}
+	else
+	{
+		filePath = filePath.substr(0, end);
+		header = header.substr(0, methodOffset) + header.substr(methodOffset + end);
+	}
+	getPathFromLocations(header, methodOffset - 4, method, 1);
+	Cgi(header, filePath, this, savedRoot);
+	return filePath;
+}
+
+
 bool Server::isFileRequest(const std::string& uri) {
     size_t lastDotPos = uri.find_last_of(".");
     if (lastDotPos != std::string::npos) {

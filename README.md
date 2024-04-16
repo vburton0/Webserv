@@ -31,3 +31,7 @@
    - https://javaplant.tistory.com/18
 - Http header
    - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers
+
+# TODO
+
+- Check si il y a 2 fois le meme port, doit retourner une erreur
