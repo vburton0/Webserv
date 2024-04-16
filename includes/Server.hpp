@@ -79,7 +79,7 @@ class Server
         void handleRequest(std::string bufstr, std::ofstream &outfile, size_t expected_size, std::string content);
         void sendErrorMethod(std::vector<std::string> methods);
         void checkForCGI(std::string header, std::string bufstr, int method_offset, std::string method, std::string saved_root);
-        std::string getFirstIndexFile(std::string root, std::list<std::string> index_files, bool auto_index);
+        std::string getFirstIndexFile(std::string root, std::list<std::string> indexFiles, bool autoIndex);
 
         // Getters and other utility functions
         const std::string& getHost() const { return host; }

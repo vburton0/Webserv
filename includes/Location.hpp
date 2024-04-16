@@ -10,10 +10,10 @@
 class Location
 {
 	private:
-		bool _auto_sighted;
-		bool _line_sighted;
-		bool _return_sighted;
-		bool _body_sighted;
+		bool _autoSighted;
+		bool _lineSighted;
+		bool _returnSighted;
+		bool _bodySighted;
 
 		void compareBlockInfo(std::string line);
 		void checkSetDefault(void);
@@ -25,12 +25,12 @@ class Location
 
 		std::string location;
 		std::string root;
-		std::list<std::string> index_files;
+		std::list<std::string> indexFiles;
 		std::vector<std::string> methods;
 		std::string cgi;
 		std::string _return;
-		size_t body_size;
-		bool auto_index;
+		size_t bodySize;
+		bool autoIndex;
 		bool suffixed;
 
 		void showLocationContent(void);

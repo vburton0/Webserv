@@ -2,9 +2,9 @@
 
 #include "../includes/Location.hpp"
 
-Location::Location(std::string line, std::ifstream & onpenFile, std::string root) : _auto_sighted(false),
-	_line_sighted(false), _return_sighted(false), _body_sighted(false), root(root), body_size(std::string::npos),
-	auto_index(true), suffixed(false)
+Location::Location(std::string line, std::ifstream & onpenFile, std::string root) : _autoSighted(false),
+	_lineSighted(false), _returnSighted(false), _bodySighted(false), root(root), bodySize(std::string::npos),
+	autoIndex(true), suffixed(false)
 {
 	if (root.empty())
 		throw Webserv::InvalidFileContentException();
@@ -38,10 +38,10 @@ Location::Location(std::string line, std::ifstream & onpenFile, std::string root
 			}
 			else
 			{
-				if (this->_return_sighted)
+				if (this->_returnSighted)
 					throw Webserv::InvalidFileContentException();
 				compareBlockInfo(line);
-				this->_line_sighted = true;
+				this->_lineSighted = true;
 			}
 		}
 	}
@@ -57,10 +57,10 @@ Location &Location::operator=(const Location & other)
 {
 	this->_return = other._return;
 	this->methods = other.methods;
-	this->auto_index = other.auto_index;
+	this->autoIndex = other.autoIndex;
 	this->root = other.root;
-	this->index_files = other.index_files;
-	this->body_size = other.body_size;
+	this->indexFiles = other.indexFiles;
+	this->bodySize = other.bodySize;
 	this->cgi = other.cgi;
 	return (*this);
 }
@@ -93,34 +93,34 @@ void Location::compareBlockInfo(std::string line)
 			if (size == std::string::npos)
 			{
 				if (line.compare(";"))
-					this->index_files.push_back(line.substr(0, line.size() - 1));
+					this->indexFiles.push_back(line.substr(0, line.size() - 1));
 				line = "";
 			}
 			else
 			{
-				this->index_files.push_back(line.substr(0, size));
+				this->indexFiles.push_back(line.substr(0, size));
 				line = line.substr(size + 1);
 			}
 		}
 	}
 	else if (!line.compare("client_max_body_size 0;") || !line.compare("client_max_body_size 0 ;"))
 	{
-		if (this->_body_sighted)
+		if (this->_bodySighted)
 			throw Webserv::InvalidFileContentException();
-		this->_body_sighted = true;
-		this->body_size = 0;
+		this->_bodySighted = true;
+		this->bodySize = 0;
 	}
 	else if (!line.compare(0, 21, "client_max_body_size "))
 	{
-		if (this->_body_sighted)
+		if (this->_bodySighted)
 			throw Webserv::InvalidFileContentException();
-		this->_body_sighted = true;
+		this->_bodySighted = true;
 		std::istringstream iss(line.substr(21));
 		int toint;
 		iss >> toint;
 		if (iss.fail() || !toint)
 			throw Webserv::InvalidFileContentException();
-		this->body_size = toint;
+		this->bodySize = toint;
 		size_t index = 21;
 		while (std::isdigit(line[index]))
 			++index;
@@ -130,16 +130,16 @@ void Location::compareBlockInfo(std::string line)
 	}
 	else if (!line.compare(0, 10, "autoindex "))
 	{
-		if (this->_auto_sighted)
+		if (this->_autoSighted)
 			throw Webserv::InvalidFileContentException();
-		this->_auto_sighted = true;
+		this->_autoSighted = true;
 		line = line.substr(10, line.size() - 11 - (line[line.size() - 2] == ' '));
 		if (line.find(' ') != std::string::npos || !line.compare(";"))
 			throw Webserv::InvalidFileContentException();
 		if (!line.compare("on"))
-			this->auto_index = true;
+			this->autoIndex = true;
 		else if (!line.compare("off"))
-			this->auto_index = false;
+			this->autoIndex = false;
 		else
 			throw Webserv::InvalidFileContentException();
 	}
@@ -175,12 +175,12 @@ void Location::compareBlockInfo(std::string line)
 	}
 	else if (!line.compare(0, 7, "return "))
 	{
-		if (this->_line_sighted)
+		if (this->_lineSighted)
 			throw Webserv::InvalidFileContentException();
 		this->_return = line.substr(7, line.size() - 8 - (line[line.size() - 2] == ' '));
 		if (this->_return.find(' ') != std::string::npos || !this->_return.compare(";"))
 			throw Webserv::InvalidFileContentException();
-		this->_return_sighted = true;
+		this->_returnSighted = true;
 	}
 }
 
@@ -221,18 +221,18 @@ void Location::showLocationContent(void)
 {
 	std::cout << "\t-location: " << this->location << std::endl;
 	std::cout << "\t  -root: " << this->root << std::endl;
-	std::cout << "\t  -auto_index: ";
-	(this->auto_index)
+	std::cout << "\t  -autoIndex: ";
+	(this->autoIndex)
 		? std::cout << "on" << std::endl
 		: std::cout << "off" << std::endl;
 	std::cout << "\t  -index: ";
-	std::list<std::string>::iterator it = this->index_files.begin();
-	std::list<std::string>::iterator ite = this->index_files.end();
+	std::list<std::string>::iterator it = this->indexFiles.begin();
+	std::list<std::string>::iterator ite = this->indexFiles.end();
 	for (; it != ite; it++)
 		std::cout << *it << ' ';
 	std::cout << std::endl;
-	if (this->body_size != std::string::npos)
-		std::cout << "\t  -body_size: " << this->body_size << std::endl;
+	if (this->bodySize != std::string::npos)
+		std::cout << "\t  -bodySize: " << this->bodySize << std::endl;
 	std::cout << "\t  -methods: ";
 	std::vector<std::string>::iterator iit = this->methods.begin();
 	std::vector<std::string>::iterator iite = this->methods.end();
