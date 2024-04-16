@@ -45,7 +45,6 @@ Cgi::Cgi(std::string header, std::string file_path, Server *serv, std::string sa
 				exit(1); // Or handle the error as appropriate for your application
 			}
 		}
-		std::cout << "on the go ffffff" << std::endl;
 	}
 
 	//fork and call cgi

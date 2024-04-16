@@ -64,6 +64,9 @@ class Server
         void setRootDirectory(const std::string& dir) { rootDirectory = dir; }
         void setDefaultFile(const std::string& file) { defaultFile = file; }
         void addPorts(std::set<int> &all_ports, size_t *number_of_ports);
+        
+        //Method
+        std::string checkForCGI(std::string header, std::string bufstr, int methodOffset, std::string method, std::string savedRoot);
 
         //Copy
         void checkSetDefault(void);
@@ -78,8 +81,7 @@ class Server
         void dirListing(DIR *dir);
         void handleRequest(std::string bufstr, std::ofstream &outfile, size_t expected_size, std::string content);
         void sendErrorMethod(std::vector<std::string> methods);
-        void checkForCGI(std::string header, std::string bufstr, int method_offset, std::string method, std::string saved_root);
-        std::string getFirstIndexFile(std::string root, std::list<std::string> indexFiles, bool autoIndex);
+        std::string getFirstIndexFile(std::string root, std::list<std::string> index_files, bool auto_index);
 
         // Getters and other utility functions
         const std::string& getHost() const { return host; }
