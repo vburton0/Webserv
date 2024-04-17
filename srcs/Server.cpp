@@ -115,43 +115,40 @@ std::list<Server> Server::parseConfigFile(const std::string& filename) {
     return servers;
 }
 
-// Wacthout ///////////////////////////////
 void Server::checkSetDefault(void)
 {
-	if (this->ports.empty() || this->_root.empty())
-		throw Server::IncompleteServerException();
-	if (this->_errorPages.find(404) == this->_errorPages.end())
-	{
-		std::string err404("error/404.html");
-		std::string file_abs_path = this->_root + err404;
-		std::ifstream newdata(file_abs_path.c_str());
-		if (!newdata.is_open())
-			throw Webserv::MissingDefault404Exception();
-		newdata.close();
-		this->_errorPages.insert(std::pair<int,std::string>(404, err404));
-	}
-	if (this->_serverType.empty())
-		this->_serverType = "default_server";
-	for (size_t index = 0; index < this->_locations.size(); index ++)
-	{
-		for (size_t sub_index = 0; sub_index < index; sub_index++)
-		{
-			if (this->_locations[index]->location == this->_locations[sub_index]->location)
-				throw Webserv::InvalidFileContentException();
-		}
-		if (!this->_locations[index]->_return.empty())
-		{
-			for (size_t loc_index = 0; loc_index < index; loc_index++)
-			{
-				if (this->_locations[loc_index]->location == this->_locations[index]->_return)
-					*this->_locations[index] = *this->_locations[loc_index];
-			}
-			if (!this->_locations[index]->_return.empty())
-				throw Webserv::InvalidFileContentException();
-		}
-	}
+	if (ports.empty() || _root.empty())
+        throw IncompleteServerException();
+	if (_errorPages.find(404) == _errorPages.end()) {
+        std::string err404 = "error/404.html";
+        std::ifstream newdata((_root + err404).c_str());
+        if (!newdata.is_open())
+            throw Webserv::MissingDefault404Exception();
+        newdata.close();
+        _errorPages[404] = err404;
+    }
+	if (_serverType.empty())
+        _serverType = "default_server";
+	std::set<std::string> seenLocations;
+    for (size_t i = 0; i < _locations.size(); ++i) {
+        if (!seenLocations.insert(_locations[i]->location).second)
+            throw Webserv::InvalidFileContentException();
+
+        if (!_locations[i]->_return.empty()) {
+            std::map<std::string, Location*> locationMap;
+            for (size_t j = 0; j < i; ++j) {
+                locationMap[_locations[j]->location] = _locations[j];
+            }
+            if (locationMap.find(_locations[i]->_return) != locationMap.end()) {
+                *_locations[i] = *locationMap[_locations[i]->_return];
+            } else {
+                throw Webserv::InvalidFileContentException();
+            }
+        }
+    }
 }
 
+// Wacthout ///////////////////////////////
 void Server::compareBlockInfo(std::string line, std::ifstream & indata)
 {
 	//std::cout << "line: " << line << std::endl;

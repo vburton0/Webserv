@@ -1,5 +1,3 @@
-// Totalement copié collé ///////////////////////////////
-
 #ifndef LOCATION_HPP
 # define LOCATION_HPP
 
@@ -16,10 +14,6 @@ class Location
 		bool _bodySighted;
 
 		void compareBlockInfo(std::string line);
-
-		void trimSpaceAndSemicolon(std::string& str);
-    	void addToList(std::string& line, std::list<std::string>& list);
-
 		void checkSetDefault(void);
 
 		template<typename T>

@@ -1,5 +1,3 @@
-// Tout Copy Paste TO CHANGEEEEEEEEEEE /////////////////////////////
-
 #include "../includes/Location.hpp"
 
 Location::Location(std::string line, std::ifstream & openFile, std::string root) : _autoSighted(false),
@@ -64,31 +62,6 @@ Location &Location::operator=(const Location & src)
 	this->cgi = src.cgi;
 	return (*this);
 }
-
-// void Location::trimSpaceAndSemicolon(std::string& str) {
-//     size_t semicolonPos = str.find(';');
-//     if (semicolonPos != std::string::npos) {
-//         str.erase(semicolonPos);
-//     }
-//     str.erase(str.find_last_not_of(" \t\n\r\f\v") + 1);
-// }
-
-// void Location::addToList(std::string& line, std::list<std::string>& list) {
-//     std::istringstream iss(line);
-//     std::string item;
-//     while (iss >> item) {
-//         if (item.back() == ';') {
-//             item.pop_back();
-//             if (item.empty()) {
-//                 throw Webserv::InvalidFileContentException();
-//             }
-//         }
-//         list.push_back(item);
-//     }
-//     if (list.empty()) {
-//         throw Webserv::InvalidFileContentException();
-//     }
-// }
 
 void Location::compareBlockInfo(std::string line) // AVRIL
 {
@@ -204,8 +177,6 @@ void Location::compareBlockInfo(std::string line) // AVRIL
 		this->_returnSighted = true;
 	}
 }
-
-
 
 void Location::checkSetDefault(void) {
     if (!_return.empty()) {
