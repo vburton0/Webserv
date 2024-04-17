@@ -67,11 +67,11 @@ class Server
         
         //Method
         std::string checkForCGI(std::string header, std::string bufstr, int methodOffset, std::string method, std::string savedRoot);
+        void showServerContent(void);
 
         //Copy
         void checkSetDefault(void);
         void compareBlockInfo(std::string line, std::ifstream & indata);
-        void showServerContent(void);
         std::string recvRequest(int flag);
         void sendResponse(const std::string response);
         void sendError(int err_code, std::string errstr);

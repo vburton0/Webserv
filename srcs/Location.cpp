@@ -33,7 +33,7 @@ Location::Location(std::string line, std::ifstream & openFile, std::string root)
 			if (!line.compare("}"))
 			{
 				checkSetDefault();
-				std::cout << "LOCATION: " << this->location << std::endl;
+				// std::cout << "LOCATION: " << location << std::endl;
 				return ;
 			}
 			else
@@ -65,76 +65,146 @@ Location &Location::operator=(const Location & src)
 	return (*this);
 }
 
-void Location::trimSpaceAndSemicolon(std::string& str) {
-    size_t semicolonPos = str.find(';');
-    if (semicolonPos != std::string::npos) {
-        str.erase(semicolonPos);
-    }
-    str.erase(str.find_last_not_of(" \t\n\r\f\v") + 1);
+// void Location::trimSpaceAndSemicolon(std::string& str) {
+//     size_t semicolonPos = str.find(';');
+//     if (semicolonPos != std::string::npos) {
+//         str.erase(semicolonPos);
+//     }
+//     str.erase(str.find_last_not_of(" \t\n\r\f\v") + 1);
+// }
+
+// void Location::addToList(std::string& line, std::list<std::string>& list) {
+//     std::istringstream iss(line);
+//     std::string item;
+//     while (iss >> item) {
+//         if (item.back() == ';') {
+//             item.pop_back();
+//             if (item.empty()) {
+//                 throw Webserv::InvalidFileContentException();
+//             }
+//         }
+//         list.push_back(item);
+//     }
+//     if (list.empty()) {
+//         throw Webserv::InvalidFileContentException();
+//     }
+// }
+
+void Location::compareBlockInfo(std::string line) // AVRIL
+{
+	//std::cout << "line: " << line << std::endl;
+	if (line[0] == '#')
+		;
+	else if (line[line.size() - 1] != ';' || line.find(';') != line.size() - 1)
+		throw Webserv::InvalidFileContentException();
+	else if (!line.compare(0, 5, "root "))
+	{
+		this->root = line.substr(5, line.size() - 6 - (line[line.size() - 2] == ' '));
+		if (this->root.find(' ') != std::string::npos || !this->root.compare(";"))
+			throw Webserv::InvalidFileContentException();
+	}
+	else if (!line.compare(0, 6, "index "))
+	{
+		line = line.substr(6);
+		if (line.empty() || !line.compare(";"))
+			throw Webserv::InvalidFileContentException();
+		while (!line.empty())
+		{
+			size_t size = line.find(' ');
+			if (size == std::string::npos)
+			{
+				if (line.compare(";"))
+					this->indexFiles.push_back(line.substr(0, line.size() - 1));
+				line = "";
+			}
+			else
+			{
+				this->indexFiles.push_back(line.substr(0, size));
+				line = line.substr(size + 1);
+			}
+		}
+	}
+	else if (!line.compare("client_max_body_size 0;") || !line.compare("client_max_body_size 0 ;"))
+	{
+		if (this->_bodySighted)
+			throw Webserv::InvalidFileContentException();
+		this->_bodySighted = true;
+		this->bodySize = 0;
+	}
+	else if (!line.compare(0, 21, "client_max_body_size "))
+	{
+		if (this->_bodySighted)
+			throw Webserv::InvalidFileContentException();
+		this->_bodySighted = true;
+		std::istringstream iss(line.substr(21));
+		int toint;
+		iss >> toint;
+		if (iss.fail() || !toint)
+			throw Webserv::InvalidFileContentException();
+		this->bodySize = toint;
+		size_t index = 21;
+		while (std::isdigit(line[index]))
+			++index;
+		if ((index == line.size() - 2 && line[index] == 'M') || (index == line.size() - 3 && line[index] == 'M' && line[index + 1] == ' '))
+			return ;
+		throw Webserv::InvalidFileContentException();
+	}
+	else if (!line.compare(0, 10, "autoindex "))
+	{
+		if (this->_autoSighted)
+			throw Webserv::InvalidFileContentException();
+		this->_autoSighted = true;
+		line = line.substr(10, line.size() - 11 - (line[line.size() - 2] == ' '));
+		if (line.find(' ') != std::string::npos || !line.compare(";"))
+			throw Webserv::InvalidFileContentException();
+		if (!line.compare("on"))
+			this->autoIndex = true;
+		else if (!line.compare("off"))
+			this->autoIndex = false;
+		else
+			throw Webserv::InvalidFileContentException();
+	}
+	else if (!line.compare(0, 14, "allow_methods "))
+	{
+		line = line.substr(14);
+		if (line.empty() || !line.compare(";"))
+			throw Webserv::InvalidFileContentException();
+		while (!line.empty())
+		{
+			size_t size = line.find(' ');
+			if (size == std::string::npos)
+			{
+				if (line.compare(";"))
+					this->methods.push_back(line.substr(0, line.size() - 1));
+				line = "";
+			}
+			else
+			{
+				this->methods.push_back(line.substr(0, size));
+				line = line.substr(size + 1);
+			}
+		}
+	}
+	else if (!line.compare(0, 4, "cgi "))
+	{
+		if (!this->cgi.empty())
+			throw Webserv::InvalidFileContentException();
+		line = line.substr(4, line.size() - 5 - (line[line.size() - 2] == ' '));
+		if (line.find(' ') != std::string::npos || !line.compare(";"))
+			throw Webserv::InvalidFileContentException();
+		this->cgi = line;
+	}
+	else if (!line.compare(0, 7, "return "))
+	{
+		if (this->_lineSighted)
+			throw Webserv::InvalidFileContentException();
+		this->_return = line.substr(7, line.size() - 8 - (line[line.size() - 2] == ' '));
+		if (this->_return.find(' ') != std::string::npos || !this->_return.compare(";"))
+			throw Webserv::InvalidFileContentException();
+		this->_returnSighted = true;
+	}
 }
 
-void Location::addToList(std::string& line, std::list<std::string>& list) {
-    std::istringstream iss(line);
-    std::string item;
-    while (iss >> item) {
-        if (item.back() == ';') {
-            item.pop_back();
-            if (item.empty()) {
-                throw Webserv::InvalidFileContentException();
-            }
-        }
-        list.push_back(item);
-    }
-    if (list.empty()) {
-        throw Webserv::InvalidFileContentException();
-    }
-}
-
-void Location::compareBlockInfo(std::string line) {
-    std::cout << "line: " << line << std::endl;
-    if (line.empty() || line[0] == '#')
-        return;
-
-    // Remove comments and trim line
-    size_t commentPos = line.find('#');
-    if (commentPos != std::string::npos) {
-        line.erase(commentPos);
-    }
-    trimSpaceAndSemicolon(line);
-
-    size_t spacePos = line.find(' ');
-    if (spacePos == std::string::npos) {
-        throw Webserv::InvalidFileContentException();
-    }
-
-    std::string directive = line.substr(0, spacePos);
-    std::string content = line.substr(spacePos + 1);
-
-    if (directive == "listen" || directive == "server_name" || directive == "root" || directive == "index" ||
-        directive == "cgi" || directive == "upload_path" || directive == "return") {
-        std::cout << directive << ": " << content << std::endl;
-    } else if (directive == "client_max_body_size") {
-        std::istringstream iss(content);
-        std::string sizeStr;
-        char unit;
-        if (!(iss >> sizeStr >> unit) || (unit != 'M' && unit != 'K' && unit != ';')) {
-            throw Webserv::InvalidFileContentException();
-        }
-        this->bodySize = std::stoul(sizeStr) * (unit == 'M' ? 1024 * 1024 : 1024);
-    // } else if (directive == "error_page") {
-    //     this->errorPages.push_back(content);
-    } else if (directive == "allow_methods") {
-        std::istringstream iss(content);
-        std::string method;
-        while (iss >> method) {
-            this->methods.push_back(method);
-        }
-    } else if (directive == "directory_listing" || directive == "autoindex") {
-        autoIndex = (content == "on");
-    }else {
-        throw Webserv::InvalidFileContentException(); // Unknown directive
-    }
-}
 
 
 void Location::checkSetDefault(void) {

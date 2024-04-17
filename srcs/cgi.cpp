@@ -59,8 +59,8 @@ Cgi::Cgi(std::string header, std::string file_path, Server *serv, std::string sa
 	{
 		//setup env
 		char **envp = setEnv(saved_root);
-		for (int index = 0; envp[index]; index++)
-				std::cout << "env line: " << envp[index] << std::endl;
+		// for (int index = 0; envp[index]; index++)
+		// 		std::cout << "env line: " << envp[index] << std::endl;
 
 		char **args = getExecveArgs();
 		if (dup2(pipe_fd[1], 1) == -1)
