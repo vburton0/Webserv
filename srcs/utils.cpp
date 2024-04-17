@@ -150,9 +150,6 @@ int checkCorrectHost(std::string bufstr, std::list<std::string> server_names)
 	size_t index = bufstr.find("Host: ");
 	if (index == std::string::npos)
 		return (1);
-	size_t multiple_host = bufstr.find("Host: ", index + 1);    ///// Watchout delete check if multiple host
-	if (multiple_host != std::string::npos)
-		return (1);
 	
 	std::list<std::string>::iterator it = server_names.begin();
 	std::list<std::string>::iterator ite = server_names.end();

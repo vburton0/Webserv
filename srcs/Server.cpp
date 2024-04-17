@@ -154,7 +154,7 @@ void Server::checkSetDefault(void)
 
 void Server::compareBlockInfo(std::string line, std::ifstream & indata)
 {
-	std::cout << "line: " << line << std::endl;
+	//std::cout << "line: " << line << std::endl;
 	if (!line.compare (0, 9, "location "))
 		this->_locations.push_back(new Location(line, indata, this->_root));
 	else if (line[line.size() - 1] != ';' || line.find(';') != line.size() - 1)
@@ -300,41 +300,36 @@ void Server::addPorts(std::set<int> &all_ports, size_t *number_of_ports) // Don'
 	}
 }
 
-void Server::showServerContent(void) // Watchout All the iterator should be simplified
+void Server::showServerContent(void)
 {
-	std::cout << "Server: "
-		<< "host: " << this->host << " port: " << this->port << " root: " << this->_root << std::endl;
-	std::cout << "Server names: ";
-	std::list<std::string>::iterator it = this->_serverNames.begin();
-	std::list<std::string>::iterator ite = this->_serverNames.end();
-	for (; it != ite; it++)
-		std::cout << *it << " ";
-	std::cout << std::endl;
-	std::cout << "Ports: ";
-	std::list<int>::iterator it2 = this->ports.begin();
-	std::list<int>::iterator ite2 = this->ports.end();
-	for (; it2 != ite2; it2++)
-		std::cout << *it2 << " ";
-	std::cout << std::endl;
-	std::cout << "Error pages: ";
-	std::map<int, std::string>::iterator it3 = this->_errorPages.begin();
-	std::map<int, std::string>::iterator ite3 = this->_errorPages.end();
-	for (; it3 != ite3; it3++)
-		std::cout << it3->first << " " << it3->second << " ";
-	std::cout << std::endl;
-	std::cout << "Max body size: " << this->_maxBodySize << std::endl;
-	std::cout << "Server type: " << this->_serverType << std::endl;
-	std::cout << "Index file: ";
-	std::list<std::string>::iterator it4 = this->_indexFile.begin();
-	std::list<std::string>::iterator ite4 = this->_indexFile.end();
-	for (; it4 != ite4; it4++)
-		std::cout << *it4 << " ";
-	std::cout << std::endl;
-	std::cout << "Locations: " << std::endl;
-	std::vector<Location *>::iterator it5 = this->_locations.begin();
-	std::vector<Location *>::iterator ite5 = this->_locations.end();
-	for (; it5 != ite5; it5++)
-		(*it5)->showLocationContent();
+    std::cout << "Server names: ";
+	for (std::list<std::string>::const_iterator it = _serverNames.begin(); it != _serverNames.end(); ++it) {
+        std::cout << *it << " ";
+    }
+
+	std::cout << "\nPorts: ";
+	for (std::list<int>::const_iterator it = ports.begin(); it != ports.end(); ++it) {
+        std::cout << *it << " ";
+    }
+
+	std::cout << "\nRoot" << _root;
+	std::cout << "\nError pages: ";
+	for (std::map<int, std::string>::const_iterator it = _errorPages.begin(); it != _errorPages.end(); ++it) {
+        std::cout << it->first << " " << it->second << " ";
+    }
+
+	std::cout << "\nMax body size: " << _maxBodySize << "\n";
+    std::cout << "Server type: " << _serverType << "\n";
+
+    std::cout << "Index file: ";
+	for (std::list<std::string>::const_iterator it = _indexFile.begin(); it != _indexFile.end(); ++it) {
+        std::cout << *it << " ";
+    }
+
+	std::cout << "\nLocations: \n";
+	for (std::vector<Location *>::const_iterator it = _locations.begin(); it != _locations.end(); ++it) {
+        (*it)->showLocationContent();
+    }
 }
 
 std::string Server::recvRequest(int check_header)

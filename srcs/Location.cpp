@@ -33,7 +33,7 @@ Location::Location(std::string line, std::ifstream & openFile, std::string root)
 			if (!line.compare("}"))
 			{
 				checkSetDefault();
-				std::cout << "LOCATION: " << this->location << std::endl;
+				// std::cout << "LOCATION: " << location << std::endl;
 				return ;
 			}
 			else
@@ -53,25 +53,46 @@ Location::~Location(void)
 
 }
 
-Location &Location::operator=(const Location & other)
+Location &Location::operator=(const Location & src)
 {
-	this->_return = other._return;
-	this->methods = other.methods;
-	this->autoIndex = other.autoIndex;
-	this->root = other.root;
-	this->indexFiles = other.indexFiles;
-	this->bodySize = other.bodySize;
-	this->cgi = other.cgi;
+	this->_return = src._return;
+	this->methods = src.methods;
+	this->autoIndex = src.autoIndex;
+	this->root = src.root;
+	this->indexFiles = src.indexFiles;
+	this->bodySize = src.bodySize;
+	this->cgi = src.cgi;
 	return (*this);
 }
 
-// ************************************************************************** //
-//                                  Private                                   //
-// ************************************************************************** //
+// void Location::trimSpaceAndSemicolon(std::string& str) {
+//     size_t semicolonPos = str.find(';');
+//     if (semicolonPos != std::string::npos) {
+//         str.erase(semicolonPos);
+//     }
+//     str.erase(str.find_last_not_of(" \t\n\r\f\v") + 1);
+// }
 
-void Location::compareBlockInfo(std::string line)
+// void Location::addToList(std::string& line, std::list<std::string>& list) {
+//     std::istringstream iss(line);
+//     std::string item;
+//     while (iss >> item) {
+//         if (item.back() == ';') {
+//             item.pop_back();
+//             if (item.empty()) {
+//                 throw Webserv::InvalidFileContentException();
+//             }
+//         }
+//         list.push_back(item);
+//     }
+//     if (list.empty()) {
+//         throw Webserv::InvalidFileContentException();
+//     }
+// }
+
+void Location::compareBlockInfo(std::string line) // AVRIL
 {
-	std::cout << "line: " << line << std::endl;
+	//std::cout << "line: " << line << std::endl;
 	if (line[0] == '#')
 		;
 	else if (line[line.size() - 1] != ';' || line.find(';') != line.size() - 1)
@@ -184,62 +205,47 @@ void Location::compareBlockInfo(std::string line)
 	}
 }
 
-void Location::checkSetDefault(void)
-{
-	if (!this->_return.empty())
-		return ;
-	if (this->root.empty())
-		throw Webserv::InvalidFileContentException();
-	for (size_t index = 0; index < this->methods.size(); index++)
-	{
-		for (size_t sub_index = 0; sub_index < index; sub_index++)
-		{
-			if (this->methods[index] == this->methods[sub_index])
-				throw Webserv::InvalidFileContentException();
-		}
-		if (this->methods[index] != "GET" && this->methods[index] != "PUT" && this->methods[index] != "POST"
-			&& this->methods[index] != "DELETE" && this->methods[index] != "HEAD")
-			throw Webserv::InvalidFileContentException();
-	}
-	if (this->methods.empty())
-	{
-		this->methods.push_back("GET");
-		this->methods.push_back("PUT");
-		this->methods.push_back("POST");
-		this->methods.push_back("DELETE");
-		this->methods.push_back("HEAD");
-	}
-	std::sort(this->methods.begin(), this->methods.end());
+
+
+void Location::checkSetDefault(void) {
+    if (!_return.empty()) {
+        return;
+    }
+    if (root.empty()) {
+        throw Webserv::InvalidFileContentException();
+    }
+    static const std::set<std::string> validMethods = {"GET", "PUT", "POST", "DELETE", "HEAD"};
+    std::set<std::string> seenMethods;
+
+    for (const auto& method : methods) {
+        // Check for duplicate and validate method
+        if (!seenMethods.insert(method).second || validMethods.find(method) == validMethods.end()) {
+            throw Webserv::InvalidFileContentException();
+        }
+    }
+
+    // Set default methods if none are provided
+    if (methods.empty()) {
+        methods = {"GET", "PUT", "POST", "DELETE", "HEAD"};
+    } else {
+        std::sort(methods.begin(), methods.end());
+    }
 }
 
 
-// ************************************************************************** //
-//                                  Public                                    //
-// ************************************************************************** //
-
-void Location::showLocationContent(void)
-{
-	std::cout << "\t-location: " << this->location << std::endl;
-	std::cout << "\t  -root: " << this->root << std::endl;
-	std::cout << "\t  -autoIndex: ";
-	(this->autoIndex)
-		? std::cout << "on" << std::endl
-		: std::cout << "off" << std::endl;
-	std::cout << "\t  -index: ";
-	std::list<std::string>::iterator it = this->indexFiles.begin();
-	std::list<std::string>::iterator ite = this->indexFiles.end();
-	for (; it != ite; it++)
-		std::cout << *it << ' ';
-	std::cout << std::endl;
-	if (this->bodySize != std::string::npos)
-		std::cout << "\t  -bodySize: " << this->bodySize << std::endl;
-	std::cout << "\t  -methods: ";
-	std::vector<std::string>::iterator iit = this->methods.begin();
-	std::vector<std::string>::iterator iite = this->methods.end();
-	for (; iit != iite; iit++)
-		std::cout << *iit << ' ';
-	std::cout << std::endl;
-	std::cout << "\t  -suffixed: " << this->suffixed << std::endl;
-	std::cout << "\t  -cgi: " << this->cgi << std::endl;
-	std::cout << "\t  -return: " << this->_return << std::endl;
+void Location::showLocationContent(void) {
+    std::cout << "\t-location: " << location << std::endl;
+    std::cout << "\t  -root: " << root << std::endl;
+    std::cout << "\t  -autoIndex: " << (autoIndex ? "on" : "off") << std::endl;
+    std::cout << "\t  -index: ";
+    printList(indexFiles);
+    std::cout << std::endl;
+    if (bodySize != std::string::npos) {
+        std::cout << "\t  -bodySize: " << bodySize << std::endl;
+    }
+    std::cout << "\t  -methods: ";
+    printList(methods);
+    std::cout << std::endl;
+    std::cout << "\t  -suffixed: " << suffixed << std::endl;
+    std::cout << "\t  -cgi: " << cgi << std::endl;
 }
