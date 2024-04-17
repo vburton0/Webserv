@@ -701,7 +701,7 @@ void Server::handleRequest(std::string body, std::ofstream &outfile, size_t expe
 	sendResponse(content);
 }
 
-std::string Server::getFirstIndexFile(std::string root, std::list<std::string> index_files, bool auto_index)
+std::string Server::getFirstIndexFile(std::string root, std::list<std::string> indexFiles, bool autoIndex)
 {
 	std::list<std::string>::iterator it = indexFiles.begin();
 	std::list<std::string>::iterator ite = indexFiles.end();
