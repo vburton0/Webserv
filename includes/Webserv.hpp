@@ -76,4 +76,4 @@ class InvalidFileException : public std::exception
 	};
 };
 
-#endif // WEBSERV_HPP
+#endif

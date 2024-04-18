@@ -100,4 +100,4 @@ class Server
         };
 };
 
-#endif // SERVER_HPP
+#endif

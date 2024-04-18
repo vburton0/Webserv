@@ -27,7 +27,7 @@ class Cgi {
 		void insertPathInfo(std::map<std::string, std::string> & env_map, std::string root);
 		std::string getScriptRelative(std::string root);
 		std::string getRemoteHost(void);
-		void add_server_names(std::map<std::string, std::string> & env_map);
+		void addServerNames(std::map<std::string, std::string> & env_map);
 		void addHeaderField(std::map<std::string, std::string> & env_map, std::string key, std::string header_key);
 
 	public:

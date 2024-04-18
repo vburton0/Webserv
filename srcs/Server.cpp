@@ -160,7 +160,6 @@ void Server::addPorts(std::set<int> &all_ports) // Don't understand the point of
 	}
 }
 
-// Wacthout ///////////////////////////////
 void Server::compareBlockInfo(std::string line, std::ifstream & indata)
 {
 	//std::cout << "line: " << line << std::endl;
@@ -695,9 +694,6 @@ std::string Server::getFirstIndexFile(std::string root, std::list<std::string> i
 	return ("");
 }
 
-
-
-/// end WATCHOUT ////////////////////////////////////////////////
 /* look for "/cgi/" in filePath and call cgi if found */
 std::string Server::checkForCGI(std::string header, std::string filePath, int methodOffset, std::string method, std::string savedRoot)
 {
