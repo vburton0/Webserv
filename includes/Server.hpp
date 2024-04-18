@@ -63,7 +63,6 @@ class Server
         void setRoute(const std::string& path, const RouteConfig& route) { routes[path] = route; }
         void setRootDirectory(const std::string& dir) { rootDirectory = dir; }
         void setDefaultFile(const std::string& file) { defaultFile = file; }
-        void addPorts(std::set<int> &all_ports, size_t *number_of_ports);
         const std::string& getHost() const { return host; }
         int getPort() const { return port; }
         
@@ -71,6 +70,7 @@ class Server
         std::string checkForCGI(std::string header, std::string bufstr, int methodOffset, std::string method, std::string savedRoot);
         void showServerContent(void);
         static std::list<Server> parseConfigFile(const std::string& configFile);
+        void addPorts(std::set<int> &all_ports);
 
         //Copy
         void checkSetDefault(void);

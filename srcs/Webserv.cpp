@@ -45,11 +45,9 @@ void Webserv::init(std::string configFile) {
 	if (this->servers.empty())
 		throw Webserv::InvalidFileContentException(); // No server block found //Watchout not same
 	
-	// Watchout Add port but Mine was probably better
 	std::set<int> ports;
-	size_t number_of_ports = 0;
 	for (std::list<Server *>::iterator it = this->servers.begin(); it != this->servers.end(); it++)
-		(*it)->addPorts(ports, &number_of_ports);
+		(*it)->addPorts(ports);
 
 
 }
