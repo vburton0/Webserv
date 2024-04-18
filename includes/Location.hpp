@@ -4,6 +4,7 @@
 # include "Webserv.hpp"
 # include <algorithm>
 # include <fstream>
+# include <set>
 
 class Location
 {
@@ -14,12 +15,14 @@ class Location
 		bool _bodySighted;
 
 		void compareBlockInfo(std::string line);
+		static std::set<std::string> createValidMethodsSet();
 		void checkSetDefault(void);
 
 		template<typename T>
 		void printList(const T& list) {
-			for (const auto& item : list) {
-				std::cout << item << ' ';
+			typename T::const_iterator it;
+			for (it = list.begin(); it != list.end(); ++it) {
+				std::cout << *it << ' ';
 			}
 		}
 

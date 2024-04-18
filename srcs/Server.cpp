@@ -2,7 +2,7 @@
 
 std::list<Server> Server::parseConfigFile(const std::string& filename) {
     std::list<Server> servers;
-    std::ifstream configFile(filename);
+    std::ifstream configFile(filename.c_str());
     if (!configFile.is_open()) {
         throw std::runtime_error("Failed to open configuration file: " + filename);
     }
@@ -368,8 +368,8 @@ std::string Server::recvRequest(int check_header)
         size_t pos = request.find("Content-Length: ");
         if (pos != std::string::npos) {
             size_t end = request.find("\r\n", pos);
-            std::string cl = request.substr(pos + 16, end - (pos + 16));
-            content_length = std::stoi(cl);
+            std::istringstream iss(request.substr(pos + 16, end - (pos + 16)));
+            iss >> content_length;
         }
     }
 

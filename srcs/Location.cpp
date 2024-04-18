@@ -178,6 +178,16 @@ void Location::compareBlockInfo(std::string line) // AVRIL
 	}
 }
 
+std::set<std::string> Location::createValidMethodsSet() {
+        std::set<std::string> methods;
+        methods.insert("GET");
+        methods.insert("PUT");
+        methods.insert("POST");
+        methods.insert("DELETE");
+        methods.insert("HEAD");
+        return methods;
+}
+
 void Location::checkSetDefault(void) {
     if (!_return.empty()) {
         return;
@@ -185,19 +195,21 @@ void Location::checkSetDefault(void) {
     if (root.empty()) {
         throw Webserv::InvalidFileContentException();
     }
-    static const std::set<std::string> validMethods = {"GET", "PUT", "POST", "DELETE", "HEAD"};
+    static const std::set<std::string> validMethods = createValidMethodsSet();
     std::set<std::string> seenMethods;
 
-    for (const auto& method : methods) {
-        // Check for duplicate and validate method
-        if (!seenMethods.insert(method).second || validMethods.find(method) == validMethods.end()) {
-            throw Webserv::InvalidFileContentException();
+    for (std::vector<std::string>::const_iterator it = methods.begin(); it != methods.end(); ++it) {
+            std::pair<std::set<std::string>::iterator, bool> result = seenMethods.insert(*it);
+            if (!result.second || validMethods.find(*it) == validMethods.end()) {
+            	throw Webserv::InvalidFileContentException();
         }
     }
 
     // Set default methods if none are provided
     if (methods.empty()) {
-        methods = {"GET", "PUT", "POST", "DELETE", "HEAD"};
+        for (std::set<std::string>::const_iterator it = validMethods.begin(); it != validMethods.end(); ++it) {
+        	methods.push_back(*it);
+    	}
     } else {
         std::sort(methods.begin(), methods.end());
     }

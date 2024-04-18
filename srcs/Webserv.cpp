@@ -11,7 +11,7 @@ void Webserv::init(std::string configFile) {
     if (!hasExtension(configFile, ".conf")) {
         std::cerr << "Invalid config file extension. Must be '.conf'." << std::endl;
     }
-    std::ifstream openFile(configFile);
+    std::ifstream openFile(configFile.c_str());
     if (!openFile.is_open()) {
         throw std::runtime_error("Failed to open configuration file: " + configFile);
     }
