@@ -155,7 +155,7 @@ void Server::addPorts(std::set<int> &all_ports) // Don't understand the point of
 	for (; it != ite; it++)
 	{
 		if (all_ports.find(*it) != all_ports.end())
-			it = ports.erase(it);
+			throw Webserv::PortsException();
 		all_ports.insert(*it);
 	}
 }

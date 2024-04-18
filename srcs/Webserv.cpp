@@ -232,3 +232,8 @@ const char* Webserv::QuickerReturnException::what() const throw()
 {
 	return ("[Webserv::QuickerReturnException] gota go fast.");
 }
+
+const char* Webserv::PortsException::what() const throw()
+{
+	return ("[Webserv::PortsException] You cannot have 2 same port.");
+}
