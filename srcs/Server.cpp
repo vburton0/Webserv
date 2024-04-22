@@ -346,11 +346,16 @@ std::string Server::recvRequest(int check_header)
             iss >> content_length;
         }
     }
+	else if (nread == -1){
+		sendError(500, "500 Internal Server Error");
+	}
 
     // Keep reading until all data is received based on Content-Length
     while (request.length() < content_length && (nread = recv(this->socketFd, buffer, sizeof(buffer), 0)) > 0) {
         request.append(buffer, nread);
     }
+	if (nread == -1)
+		sendError(500, "500 Internal Server Error");
 
 	if (check_header)
 		request = checkChunckEncoding(request);
@@ -361,7 +366,9 @@ void Server::sendResponse(std::string msg)
 {
 	std::cerr << std::endl << " -- status return " << msg << " --" << std::endl;
 	std::string content = "HTTP/1.1 " + msg + "\n\n";
-	send(this->socketFd, content.c_str(), content.size(), 0);
+	if (send(this->socketFd, content.c_str(), content.size(), 0) == -1) {
+		sendError(500, "500 Internal Server Error");
+	}
 }
 
 void Server::sendError(int err_code, std::string errstr)
@@ -385,7 +392,9 @@ void Server::sendError(int err_code, std::string errstr)
 	else
 		content += '\n';
 	SEND:
-	send(this->socketFd, content.c_str(), content.size(), 0);
+	if (send(this->socketFd, content.c_str(), content.size(), 0) == -1) {
+		sendError(500, "500 Internal Server Error");
+	}
 	throw Webserv::QuickerReturnException();
 }
 
@@ -456,7 +465,9 @@ void Server::analyseRequest(std::string bufstr)
 		std::ostringstream content_length;
 		content_length << file_content.size();
 		content += content_length.str() + "\n\n" + file_content;
-		send(this->socketFd, content.c_str(), content.size(), 0);
+		if (send(this->socketFd, content.c_str(), content.size(), 0) == -1) {
+		sendError(500, "500 Internal Server Error");
+	}
 	}
 	else if (!bufstr.compare(0, 4, "PUT ") || !bufstr.compare(0, 5, "POST "))
 	{
@@ -519,7 +530,9 @@ void Server::analyseRequest(std::string bufstr)
 			std::ostringstream content_length;
 			content_length << body.size();
 			content += content_length.str() + "\n\n" + body;
-			send(this->socketFd, content.c_str(), content.size(), 0);
+			if (send(this->socketFd, content.c_str(), content.size(), 0) == -1) {
+					sendError(500, "500 Internal Server Error");
+			}
 			std::cout << "-- return status 202 Accepted --" << std::endl;
 		}
 	}
@@ -538,7 +551,9 @@ void Server::analyseRequest(std::string bufstr)
 			std::cout << "File could not be deleted\n";
 			content = "HTTP/1.1 404 Not Found\n";
 		}
-		send(this->socketFd, content.c_str(), content.size(), 0);
+		if (send(this->socketFd, content.c_str(), content.size(), 0) == -1) {
+			sendError(500, "500 Internal Server Error");
+		}
 	}
 }
 
@@ -631,7 +646,9 @@ void Server::dirListing(DIR *dir)
 
 	std::string content = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: ";
 	content += content_length.str() + "\n\n" + body;
-	send(this->socketFd, content.c_str(), content.size(), 0);
+	if (send(this->socketFd, content.c_str(), content.size(), 0) == -1) {
+		sendError(500, "500 Internal Server Error");
+	}
 	throw Webserv::QuickerReturnException();
 }
 
