@@ -17,21 +17,21 @@ class Server;
 class Cgi {
 	private:
 		std::string _header;
-		std::string _file_path;
+		std::string _filePath;
 		Server *_serv;
 
 		char **getExecveArgs(void);
-		char **setEnv(std::string saved_root);
-		std::string get_port(void);
+		char **setEnv(std::string savedRoot);
+		std::string getPort(void);
 		std::string getMethod(void);
-		void insertPathInfo(std::map<std::string, std::string> & env_map, std::string root);
+		void insertPathInfo(std::map<std::string, std::string> & envMap, std::string root);
 		std::string getScriptRelative(std::string root);
 		std::string getRemoteHost(void);
-		void addServerNames(std::map<std::string, std::string> & env_map);
-		void addHeaderField(std::map<std::string, std::string> & env_map, std::string key, std::string header_key);
+		void addServerNames(std::map<std::string, std::string> & envMap);
+		void addHeaderField(std::map<std::string, std::string> & envMap, std::string key, std::string headerKey);
 
 	public:
-		Cgi(std::string header, std::string file_path, Server *serv, std::string saved_root);
+		Cgi(std::string header, std::string filePath, Server *serv, std::string savedRoot);
 		~Cgi(void);
 };
 

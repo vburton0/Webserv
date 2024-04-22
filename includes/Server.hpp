@@ -23,7 +23,7 @@ class Server
         int port;
         std::string _root;
         std::vector<Location *> _locations;
-        std::string _initial_loc;
+        std::string _initialLoc;
         std::string _serverType;
         std::list<std::string> _indexFile;
         bool _bodySighted;
@@ -72,7 +72,7 @@ class Server
         static std::list<Server> parseConfigFile(const std::string& configFile);
         void addPorts(std::set<int> &all_ports);
 
-        //Copy
+
         void checkSetDefault(void);
         void compareBlockInfo(std::string line, std::ifstream & indata);
         std::string recvRequest(int flag);

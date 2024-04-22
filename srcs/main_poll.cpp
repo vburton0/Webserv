@@ -1,14 +1,6 @@
-#include <iostream>
 #include <filesystem>
-#include <sys/socket.h>
 #include <arpa/inet.h>
-#include <unistd.h>
-#include <fcntl.h>
 #include <cstring>
-#include <sstream>
-#include <fstream>
-#include <poll.h>
-#include <vector>
 #include <algorithm>
 #include "../includes/Webserv.hpp"
 

@@ -148,7 +148,7 @@ void Server::checkSetDefault(void)
     }
 }
 
-void Server::addPorts(std::set<int> &all_ports) // Don't understand the point of this
+void Server::addPorts(std::set<int> &all_ports)
 {
 	std::list<int>::iterator it = ports.begin();
 	std::list<int>::iterator ite = ports.end();
@@ -585,7 +585,7 @@ std::string Server::getPathFromLocations(std::string & loc, int methodOffset, st
 		ret = this->_root;
 	else
 		ret = this->_locations[match_index]->root;
-	this->_initial_loc = substr_loc;
+	this->_initialLoc = substr_loc;
 	std::string savedRoot = ret;
 	loc = loc.substr(0, 4 + methodOffset) + loc.substr(4 + methodOffset + match_size);
 	if (!loc.compare(4 + methodOffset, 2, "/ ") || !loc.compare(4 + methodOffset, 1, " "))
@@ -610,7 +610,7 @@ std::string Server::getPathFromLocations(std::string & loc, int methodOffset, st
 
 void Server::dirListing(DIR *dir)
 {
-	std::string body = "<!DOCTYPE html>\n<html>\n <body>\n<center>\n	<div>\n		<H1>Index of " + getLastWord(this->_initial_loc) + "</H1>\n	</div>\n";
+	std::string body = "<!DOCTYPE html>\n<html>\n <body>\n<center>\n	<div>\n		<H1>Index of " + getLastWord(this->_initialLoc) + "</H1>\n	</div>\n";
 	struct dirent *dent;
 	std::string dot = ".";
 
@@ -618,8 +618,8 @@ void Server::dirListing(DIR *dir)
 	{
 		if (dot.compare(0, 2, dent->d_name))
 		{
-			body += "<p><a href=\"" + this->_initial_loc;
-			if (this->_initial_loc[this->_initial_loc.size() - 1] != '/')
+			body += "<p><a href=\"" + this->_initialLoc;
+			if (this->_initialLoc[this->_initialLoc.size() - 1] != '/')
 				body += '/';
 			body += std::string(dent->d_name) + "\">" + std::string(dent->d_name) + "</a></p>\n";
 		}
