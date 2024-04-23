@@ -608,10 +608,16 @@ std::string Server::getPathFromLocations(std::string & loc, int methodOffset, st
 		if (match_index_files.empty())
 			ret = getFirstIndexFile(ret, this->_indexFile, autoIndex && !method.compare("GET"));
 		else
+		{
 			ret = getFirstIndexFile(ret, match_index_files, autoIndex && !method.compare("GET"));
+			ret = savedRoot + ret;
+		}
 	}
 	else if (!loc.compare(4 + methodOffset, 1, "/"))
+	{
+		ret = this->_locations[match_index]->root;
 		ret += loc.substr(5 + methodOffset, loc.find(" ", 5 + methodOffset) - (5 + methodOffset));
+	}
 	else
 		ret += loc.substr(4 + methodOffset, loc.find(" ", 4 + methodOffset) - (4 + methodOffset));
 	loc = loc.substr(0, 4 + methodOffset) + ret + loc.substr(loc.find(' ', 4 + methodOffset));
