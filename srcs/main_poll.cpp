@@ -4,30 +4,6 @@
 #include <algorithm>
 #include "../includes/Webserv.hpp"
 
-
-void parseHttpRequest(const std::string& request, std::string& method, std::string& uri, std::string& httpVersion, std::map<std::string, std::string>& headers) {
-    std::istringstream requestStream(request);
-    std::string line;
-
-    // Get the request line
-    std::getline(requestStream, line);
-    std::istringstream requestLineStream(line);
-    requestLineStream >> method >> uri >> httpVersion;
-
-    // Read headers
-    while (std::getline(requestStream, line) && line != "\r") {
-        std::istringstream headerLineStream(line);
-        std::string key, value;
-        if (std::getline(headerLineStream, key, ':')) {
-            std::getline(headerLineStream, value);
-            if (!value.empty() && value[0] == ' ') {
-                value.erase(0, 1); // Remove leading space
-            }
-            headers[key] = value;
-        }
-    }
-}
-
 int main(int ac, char **av) {
     // Config File and args handler
     std::string configFile;

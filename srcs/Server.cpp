@@ -397,7 +397,7 @@ std::string Server::checkChunckEncoding(std::string bufstr)
 	char buffer[BUFFER_SIZE + 1] = {0};
 	// sendError(this->socketFd, 100, "100 Continue");
 	ssize_t valread = recv(this->socketFd, buffer, BUFFER_SIZE, 0);
-	if (valread == -1)
+	if (valread == -1 && valread == 0)
 		sendError(500, "500 Internal Server Error");
 	while (valread && buffer[0] != '0')
 	{

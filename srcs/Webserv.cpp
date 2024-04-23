@@ -143,7 +143,7 @@ void Webserv::launchServers(void)
 				}
 
 				// addrlen = sizeof(address[index]);
-				if ((polling_serv->socketFd = accept(pfds[index].fd, NULL, 0)) < 0)//(struct sockaddr *) &address->butnotaddressthatisup[index], (socklen_t*) &addrlen)) < 0)
+				if ((polling_serv->socketFd = accept(pfds[index].fd, NULL, 0)) < 0)
 				{
 					perror("accept");
 					return ;
