@@ -131,6 +131,7 @@ void Webserv::launchServers(void)
 			if (pfds[index].revents != 0) {
 				std::cout << "  - (index " << index << ") socket = " << pfds[index].fd << "; events: ";
 				(pfds[index].revents & POLLIN)  ? std::cout << "POLLIN "  : std::cout << "";
+				(pfds[index].revents & POLLOUT) ? std::cout << "POLLOUT " : std::cout << "";
 				(pfds[index].revents & POLLHUP) ? std::cout << "POLLHUP " : std::cout << "";
 				(pfds[index].revents & POLLERR) ? std::cout << "POLLERR " : std::cout << "";
 				std::cout << std::endl << std::endl;
