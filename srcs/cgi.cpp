@@ -118,7 +118,7 @@ Cgi::Cgi(std::string header, std::string filePath, Server *serv, std::string sav
 		serv->sendError(500, "500 Internal Server Error");
 	if (isErrorCode(toint))
 		serv->sendError(toint, bufstr.substr(9, bufstr.find('\n', 9) - 9));
-	if (send(serv->socketFd, bufstr.c_str(), bufstr.size(), 0) == -1) {
+	if (send(serv->socketFd, bufstr.c_str(), bufstr.size(), 0) <= 0) {
 		serv->sendError(500, "500 Internal Server Error");
 	}
 

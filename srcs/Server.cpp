@@ -346,7 +346,7 @@ std::string Server::recvRequest(int check_header)
             iss >> content_length;
         }
     }
-	else if (nread == -1){
+	else if (nread <= 0){
 		sendError(500, "500 Internal Server Error");
 	}
 
@@ -366,7 +366,7 @@ void Server::sendResponse(std::string msg)
 {
 	std::cerr << std::endl << " -- status return " << msg << " --" << std::endl;
 	std::string content = "HTTP/1.1 " + msg + "\n\n";
-	if (send(this->socketFd, content.c_str(), content.size(), 0) == -1) {
+	if (send(this->socketFd, content.c_str(), content.size(), 0) <= 0) {
 		sendError(500, "500 Internal Server Error");
 	}
 }
@@ -392,7 +392,7 @@ void Server::sendError(int err_code, std::string errstr)
 	else
 		content += '\n';
 	SEND:
-	if (send(this->socketFd, content.c_str(), content.size(), 0) == -1) {
+	if (send(this->socketFd, content.c_str(), content.size(), 0) <= 0) {
 		sendError(500, "500 Internal Server Error");
 	}
 	throw Webserv::QuickerReturnException();
@@ -465,9 +465,9 @@ void Server::analyseRequest(std::string bufstr)
 		std::ostringstream content_length;
 		content_length << file_content.size();
 		content += content_length.str() + "\n\n" + file_content;
-		if (send(this->socketFd, content.c_str(), content.size(), 0) == -1) {
-		sendError(500, "500 Internal Server Error");
-	}
+		if (send(this->socketFd, content.c_str(), content.size(), 0) <= 0) {
+			sendError(500, "500 Internal Server Error");
+		}
 	}
 	else if (!bufstr.compare(0, 4, "PUT ") || !bufstr.compare(0, 5, "POST "))
 	{
@@ -551,7 +551,7 @@ void Server::analyseRequest(std::string bufstr)
 			std::cout << "File could not be deleted\n";
 			content = "HTTP/1.1 404 Not Found\n";
 		}
-		if (send(this->socketFd, content.c_str(), content.size(), 0) == -1) {
+		if (send(this->socketFd, content.c_str(), content.size(), 0) <= 0) {
 			sendError(500, "500 Internal Server Error");
 		}
 	}
@@ -646,7 +646,7 @@ void Server::dirListing(DIR *dir)
 
 	std::string content = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: ";
 	content += content_length.str() + "\n\n" + body;
-	if (send(this->socketFd, content.c_str(), content.size(), 0) == -1) {
+	if (send(this->socketFd, content.c_str(), content.size(), 0) <= 0) {
 		sendError(500, "500 Internal Server Error");
 	}
 	throw Webserv::QuickerReturnException();
