@@ -566,13 +566,13 @@ std::string Server::getPathFromLocations(std::string & loc, int methodOffset, st
 	size_t match_index;
 	bool autoIndex;
 	std::list<std::string> match_index_files;
-
-	std::cout << "loc: " << loc << std::endl;
-	std::cout << "substr_loc: " << substr_loc << std::endl;
 	
+
+	// std::cout << "\n\n\n\n\n\n";
 	for (size_t loc_index = 0; loc_index < this->_locations.size(); loc_index++)
 	{
 		size_t loc_size = this->_locations[loc_index]->location.size();
+		std::cout << "LOC SIZE: " << loc_size << std::endl;
 		if (loc_size <= substr_loc.size() && ((!this->_locations[loc_index]->suffixed && !substr_loc.compare(0, loc_size, this->_locations[loc_index]->location))
 			|| (this->_locations[loc_index]->suffixed && !substr_loc.compare(substr_loc.size() - loc_size, loc_size, this->_locations[loc_index]->location))))
 		{
@@ -581,16 +581,23 @@ std::string Server::getPathFromLocations(std::string & loc, int methodOffset, st
 			if (!match_size || loc_size > match_size || this->_locations[loc_index]->suffixed)
 			{
 				match_size = loc_size;
+				// std::cout << "MATCH SIZE: " << match_size << "\n\n\n\n\n\n\n";
 				match_index = loc_index;
+				// std::cout << "MATCH INDEX: " << match_index << "\n";
 				match_index_files = this->_locations[loc_index]->indexFiles;
+				// std::cout << "MATCH INDEX FILES: " << match_index_files.size() << "\n";
 				autoIndex = this->_locations[loc_index]->autoIndex;
+				// std::cout << "AUTO INDEX: " << autoIndex << "\n";
 				this->actualBodySize = this->_locations[loc_index]->bodySize;
+				// std::cout << "ACTUAL BODY SIZE: " << this->actualBodySize << "\n";
 				if (this->_locations[loc_index]->suffixed)
 				{
+					// std::cout << "SUFFIXED\n";
 					match_size = 1;
 					break ;
 				}
 			}
+			// std::cout << "\n\n\n\n\n\n\n";
 		}
 	}
 	if (!recursive_stop && match_size && std::find(this->_locations[match_index]->methods.begin(), this->_locations[match_index]->methods.end(), method) == this->_locations[match_index]->methods.end())
@@ -600,17 +607,18 @@ std::string Server::getPathFromLocations(std::string & loc, int methodOffset, st
 	}
 	if (this->actualBodySize == std::string::npos)
 		this->actualBodySize = this->_maxBodySize;
-	if (!match_size && !this->_root.empty())
+	// std::cout << "MATCH SIZE VALUE: " << match_size << std::endl;
+ 	if (!match_size && !this->_root.empty())
 	{
-		std::cout << "CALL HERE\n\n\n\n\n\n";
+		// std::cout << "CALL HERE\n\n\n\n\n\n";
 		ret = this->_root;
-		std::cout << "ret: " << ret << std::endl;
+		// std::cout << "ret: " << ret << std::endl;
 	}
 	else
 	{
-		std::cout << "CALL HERE IN ELSE\n\n\n\n\n\n";
+		// std::cout << "CALL HERE IN ELSE\n\n\n\n\n\n";
 		ret = this->_locations[match_index]->root;
-		std::cout << "ret: " << ret << std::endl;
+		// std::cout << "ret: " << ret << std::endl;
 	}
 	this->_initialLoc = substr_loc;
 	std::string savedRoot = ret;
@@ -620,43 +628,43 @@ std::string Server::getPathFromLocations(std::string & loc, int methodOffset, st
 		if (match_index_files.empty())
 		{
 			ret = getFirstIndexFile(ret, this->_indexFile, autoIndex && !method.compare("GET"));
-			std::cout << "FIRST INDEX FIRST CONDITIONS FILE: ret: " << ret << std::endl;
+			// std::cout << "FIRST INDEX FIRST CONDITIONS FILE: ret: " << ret << std::endl;
 		}
 		else
 		{
 			ret = getFirstIndexFile(ret, match_index_files, autoIndex && !method.compare("GET"));
 			ret = savedRoot + ret;
-			std::cout << "SECONDE CONDITIONS INDEX FILE: ret: " << ret << std::endl;
+			// std::cout << "SECONDE CONDITIONS INDEX FILE: ret: " << ret << std::endl;
 		}
 	}
 	else if (!loc.compare(4 + methodOffset, 1, "/"))
 	{
-		std::cout << "FIRST loc: " << loc << std::endl;
+		// std::cout << "FIRST loc: " << loc << std::endl;
 		ret += loc.substr(5 + methodOffset, loc.find(" ", 5 + methodOffset) - (5 + methodOffset));
-		std::cout << "FIRST LOC FILE: ret: " << ret << std::endl;
+		// std::cout << "FIRST LOC FILE: ret: " << ret << std::endl;
 	}
 	else if (!loc.compare(4 + methodOffset, 2, "/ "))
 	{
 		if (match_index_files.empty())
 		{
 			ret = getFirstIndexFile(ret, this->_indexFile, autoIndex && !method.compare("GET"));
-			std::cout << "FIRST INDEX FILE: ret: " << ret << std::endl;
+			// std::cout << "FIRST INDEX FILE: ret: " << ret << std::endl;
 		}
 		else
 		{
 			ret = getFirstIndexFile(ret, match_index_files, autoIndex && !method.compare("GET"));
 			ret = savedRoot + ret;
-			std::cout << "SECONDE INDEX FILE: ret: " << ret << std::endl;
+			// std::cout << "SECONDE INDEX FILE: ret: " << ret << std::endl;
 		}
-		std::cout << "SECOND loc: " << loc << std::endl;
+		// std::cout << "SECOND loc: " << loc << std::endl;
 		ret += loc.substr(4 + methodOffset, loc.find(" ", 4 + methodOffset) - (4 + methodOffset));
-		std::cout << "SECOND LOC FILE: ret: " << ret << std::endl;
+		// std::cout << "SECOND LOC FILE: ret: " << ret << std::endl;
 	}
 	else
 	{
-		std::cout << "SECOND loc: " << loc << std::endl;
+		// std::cout << "SECOND loc: " << loc << std::endl;
 		ret += loc.substr(4 + methodOffset, loc.find(" ", 4 + methodOffset) - (4 + methodOffset));
-		std::cout << "SECOND LOC FILE: ret: " << ret << std::endl;
+		// std::cout << "SECOND LOC FILE: ret: " << ret << std::endl;
 	}
 	loc = loc.substr(0, 4 + methodOffset) + ret + loc.substr(loc.find(' ', 4 + methodOffset));
 	if (recursive_stop)
