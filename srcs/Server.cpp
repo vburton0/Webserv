@@ -566,6 +566,10 @@ std::string Server::getPathFromLocations(std::string & loc, int methodOffset, st
 	size_t match_index;
 	bool autoIndex;
 	std::list<std::string> match_index_files;
+
+	std::cout << "loc: " << loc << std::endl;
+	std::cout << "substr_loc: " << substr_loc << std::endl;
+	
 	for (size_t loc_index = 0; loc_index < this->_locations.size(); loc_index++)
 	{
 		size_t loc_size = this->_locations[loc_index]->location.size();
@@ -596,10 +600,18 @@ std::string Server::getPathFromLocations(std::string & loc, int methodOffset, st
 	}
 	if (this->actualBodySize == std::string::npos)
 		this->actualBodySize = this->_maxBodySize;
-	if (!match_size)
+	if (!match_size && !this->_root.empty())
+	{
+		std::cout << "CALL HERE\n\n\n\n\n\n";
 		ret = this->_root;
+		std::cout << "ret: " << ret << std::endl;
+	}
 	else
+	{
+		std::cout << "CALL HERE IN ELSE\n\n\n\n\n\n";
 		ret = this->_locations[match_index]->root;
+		std::cout << "ret: " << ret << std::endl;
+	}
 	this->_initialLoc = substr_loc;
 	std::string savedRoot = ret;
 	loc = loc.substr(0, 4 + methodOffset) + loc.substr(4 + methodOffset + match_size);
@@ -608,13 +620,13 @@ std::string Server::getPathFromLocations(std::string & loc, int methodOffset, st
 		if (match_index_files.empty())
 		{
 			ret = getFirstIndexFile(ret, this->_indexFile, autoIndex && !method.compare("GET"));
-			std::cout << "FIRST INDEX FILE: ret: " << ret << std::endl;
+			std::cout << "FIRST INDEX FIRST CONDITIONS FILE: ret: " << ret << std::endl;
 		}
 		else
 		{
 			ret = getFirstIndexFile(ret, match_index_files, autoIndex && !method.compare("GET"));
 			ret = savedRoot + ret;
-			std::cout << "SECONDE INDEX FILE: ret: " << ret << std::endl;
+			std::cout << "SECONDE CONDITIONS INDEX FILE: ret: " << ret << std::endl;
 		}
 	}
 	else if (!loc.compare(4 + methodOffset, 1, "/"))
