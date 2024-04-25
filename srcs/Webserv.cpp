@@ -91,6 +91,7 @@ void Webserv::launchServers(void)
 				return ;
 			}
 			pfds[index].events = POLLIN;
+			fcntl(pfds[index].fd, F_SETFL, O_NONBLOCK); //TO CHECK ON MACOS
 
 			address[index].sin_family = PF_INET;
 			address[index].sin_addr.s_addr = INADDR_ANY;
@@ -149,6 +150,7 @@ void Webserv::launchServers(void)
 					perror("accept");
 					return ;
 				}
+				fcntl(pfds[index].fd, F_SETFL, O_NONBLOCK); //TO CHECK ON MACOS
 
 				try
 				{
