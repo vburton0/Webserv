@@ -15,7 +15,6 @@ std::list<Server> Server::parseConfigFile(const std::string& filename) {
     RouteConfig currentRouteConfig;
 
     while (std::getline(configFile, line)) {
-        // Ignores comments and empty lines
         size_t commentPos = line.find('#');
         if (commentPos != std::string::npos) {
             line = line.substr(0, commentPos);
@@ -36,7 +35,7 @@ std::list<Server> Server::parseConfigFile(const std::string& filename) {
             inServerBlock = true;
         } else if (inServerBlock && key == "listen") {
         std::string hostPortStr;
-        iss >> hostPortStr; // Read the host:port part
+        iss >> hostPortStr;
 
         size_t colonPos = hostPortStr.find(':');
         if (colonPos == std::string::npos) {
@@ -162,7 +161,6 @@ void Server::addPorts(std::set<int> &all_ports)
 
 void Server::compareBlockInfo(std::string line, std::ifstream & indata)
 {
-	//std::cout << "line: " << line << std::endl;
 	if (!line.compare (0, 9, "location "))
 		this->_locations.push_back(new Location(line, indata, this->_root));
 	else if (line[line.size() - 1] != ';' || line.find(';') != line.size() - 1)
@@ -335,7 +333,6 @@ std::string Server::recvRequest(int check_header)
     ssize_t nread;
     size_t content_length = 0;
 
-    // Initial read to get headers and possibly part of the body
     nread = recv(this->socketFd, buffer, sizeof(buffer), 0);
     if (nread > 0) {
         request.append(buffer, nread);
@@ -350,7 +347,6 @@ std::string Server::recvRequest(int check_header)
 		sendError(500, "500 Internal Server Error");
 	}
 
-    // Keep reading until all data is received based on Content-Length
     while (request.length() < content_length && (nread = recv(this->socketFd, buffer, sizeof(buffer), 0)) > 0) {
         request.append(buffer, nread);
     }
@@ -404,7 +400,6 @@ std::string Server::checkChunckEncoding(std::string bufstr)
 		return  (bufstr);
 	std::string sub_bufstr;
 	char buffer[BUFFER_SIZE + 1] = {0};
-	// sendError(this->socketFd, 100, "100 Continue");
 	ssize_t valread = recv(this->socketFd, buffer, BUFFER_SIZE, 0);
 	if (valread <= 0)
 		sendError(500, "500 Internal Server Error");
@@ -412,7 +407,6 @@ std::string Server::checkChunckEncoding(std::string bufstr)
 	{
 		bufstr += buffer;
 		displaySpecialCharacters(buffer);
-		// sendError(this->socketFd, 100, "100 Continue");
 		valread = recv(this->socketFd, buffer, BUFFER_SIZE, 0);
 		if (valread <= 0)
 			sendError(500, "500 Internal Server Error");
@@ -431,8 +425,7 @@ void Server::analyseRequest(std::string bufstr)
 		return ;
 	}
 	std::string content;
-	// std::cout << bufstr.size() << ": " << bufstr << std::endl;
-	displaySpecialCharacters(bufstr); //used for debug because /r present in buffer
+	displaySpecialCharacters(bufstr);
 
 	if (checkHttpVersion(bufstr))
 		sendError(505, "505 HTTP Version Not Supported");
@@ -568,7 +561,6 @@ std::string Server::getPathFromLocations(std::string & loc, int methodOffset, st
 	std::list<std::string> match_index_files;
 	
 
-	// std::cout << "\n\n\n\n\n\n";
 	for (size_t loc_index = 0; loc_index < this->_locations.size(); loc_index++)
 	{
 		size_t loc_size = this->_locations[loc_index]->location.size();
@@ -581,23 +573,16 @@ std::string Server::getPathFromLocations(std::string & loc, int methodOffset, st
 			if (!match_size || loc_size > match_size || this->_locations[loc_index]->suffixed)
 			{
 				match_size = loc_size;
-				// std::cout << "MATCH SIZE: " << match_size << "\n\n\n\n\n\n\n";
 				match_index = loc_index;
-				// std::cout << "MATCH INDEX: " << match_index << "\n";
 				match_index_files = this->_locations[loc_index]->indexFiles;
-				// std::cout << "MATCH INDEX FILES: " << match_index_files.size() << "\n";
 				autoIndex = this->_locations[loc_index]->autoIndex;
-				// std::cout << "AUTO INDEX: " << autoIndex << "\n";
 				this->actualBodySize = this->_locations[loc_index]->bodySize;
-				// std::cout << "ACTUAL BODY SIZE: " << this->actualBodySize << "\n";
 				if (this->_locations[loc_index]->suffixed)
 				{
-					// std::cout << "SUFFIXED\n";
 					match_size = 1;
 					break ;
 				}
 			}
-			// std::cout << "\n\n\n\n\n\n\n";
 		}
 	}
 	if (!recursive_stop && match_size && std::find(this->_locations[match_index]->methods.begin(), this->_locations[match_index]->methods.end(), method) == this->_locations[match_index]->methods.end())
@@ -607,18 +592,13 @@ std::string Server::getPathFromLocations(std::string & loc, int methodOffset, st
 	}
 	if (this->actualBodySize == std::string::npos)
 		this->actualBodySize = this->_maxBodySize;
-	// std::cout << "MATCH SIZE VALUE: " << match_size << std::endl;
  	if (!match_size && !this->_root.empty())
 	{
-		// std::cout << "CALL HERE\n\n\n\n\n\n";
 		ret = this->_root;
-		// std::cout << "ret: " << ret << std::endl;
 	}
 	else
 	{
-		// std::cout << "CALL HERE IN ELSE\n\n\n\n\n\n";
 		ret = this->_locations[match_index]->root;
-		// std::cout << "ret: " << ret << std::endl;
 	}
 	this->_initialLoc = substr_loc;
 	std::string savedRoot = ret;
@@ -628,43 +608,33 @@ std::string Server::getPathFromLocations(std::string & loc, int methodOffset, st
 		if (match_index_files.empty())
 		{
 			ret = getFirstIndexFile(ret, this->_indexFile, autoIndex && !method.compare("GET"));
-			// std::cout << "FIRST INDEX FIRST CONDITIONS FILE: ret: " << ret << std::endl;
 		}
 		else
 		{
 			ret = getFirstIndexFile(ret, match_index_files, autoIndex && !method.compare("GET"));
 			ret = savedRoot + ret;
-			// std::cout << "SECONDE CONDITIONS INDEX FILE: ret: " << ret << std::endl;
 		}
 	}
 	else if (!loc.compare(4 + methodOffset, 1, "/"))
 	{
-		// std::cout << "FIRST loc: " << loc << std::endl;
 		ret += loc.substr(5 + methodOffset, loc.find(" ", 5 + methodOffset) - (5 + methodOffset));
-		// std::cout << "FIRST LOC FILE: ret: " << ret << std::endl;
 	}
 	else if (!loc.compare(4 + methodOffset, 2, "/ "))
 	{
 		if (match_index_files.empty())
 		{
 			ret = getFirstIndexFile(ret, this->_indexFile, autoIndex && !method.compare("GET"));
-			// std::cout << "FIRST INDEX FILE: ret: " << ret << std::endl;
 		}
 		else
 		{
 			ret = getFirstIndexFile(ret, match_index_files, autoIndex && !method.compare("GET"));
 			ret = savedRoot + ret;
-			// std::cout << "SECONDE INDEX FILE: ret: " << ret << std::endl;
 		}
-		// std::cout << "SECOND loc: " << loc << std::endl;
 		ret += loc.substr(4 + methodOffset, loc.find(" ", 4 + methodOffset) - (4 + methodOffset));
-		// std::cout << "SECOND LOC FILE: ret: " << ret << std::endl;
 	}
 	else
 	{
-		// std::cout << "SECOND loc: " << loc << std::endl;
 		ret += loc.substr(4 + methodOffset, loc.find(" ", 4 + methodOffset) - (4 + methodOffset));
-		// std::cout << "SECOND LOC FILE: ret: " << ret << std::endl;
 	}
 	loc = loc.substr(0, 4 + methodOffset) + ret + loc.substr(loc.find(' ', 4 + methodOffset));
 	if (recursive_stop)
@@ -722,7 +692,6 @@ void Server::sendErrorMethod(std::vector<std::string> methods)
 void Server::handleRequest(std::string body, std::ofstream &outfile, size_t expected_size, std::string content)
 {
 	std::cout << "body size: " << body.size() << ", selected max_body_size: " << this->actualBodySize << std::endl;
-	// std::cout << body << std::endl;
 
 	if (body.size() > this->actualBodySize * 1000000)
 	{
@@ -763,7 +732,6 @@ std::string Server::getFirstIndexFile(std::string root, std::list<std::string> i
 	return ("");
 }
 
-/* look for "/cgi/" in filePath and call cgi if found */
 std::string Server::checkForCGI(std::string header, std::string filePath, int methodOffset, std::string method, std::string savedRoot)
 {
 	size_t cgiPos = filePath.find("/cgi/");
@@ -773,7 +741,7 @@ std::string Server::checkForCGI(std::string header, std::string filePath, int me
 	
 	size_t uploadedPos = filePath.find("/uploadedFiles/");
     if (uploadedPos != std::string::npos) {
-        return filePath.erase(cgiPos, 4);  // Remove the "/cgi" part from the path
+        return filePath.erase(cgiPos, 4);
     }
 
 
@@ -803,15 +771,14 @@ std::string Server::checkForCGI(std::string header, std::string filePath, int me
 bool Server::isFileRequest(const std::string& uri) {
     size_t lastDotPos = uri.find_last_of(".");
     if (lastDotPos != std::string::npos) {
-        // Check if there's an extension
-        return uri.find('/', lastDotPos) == std::string::npos; // Ensure no '/' after the dot
+        return uri.find('/', lastDotPos) == std::string::npos;
     }
     return false;
 }
 
 std::string Server::getFilePath(const std::string& uri) {
-    const std::string rootDirectory = "resources/Les2canons"; // Change to your static files directory
-    return rootDirectory + uri; // Simple concatenation of root directory and URI
+    const std::string rootDirectory = "resources/Les2canons";
+    return rootDirectory + uri;
 }
 
 
@@ -821,7 +788,6 @@ std::string Server::getMimeType(const std::string& filePath) {
     if (dotPos != std::string::npos) {
         std::string ext = filePath.substr(dotPos + 1);
 
-        // Basic MIME types
         if (ext == "html" || ext == "htm") return "text/html";
         if (ext == "css") return "text/css";
         if (ext == "js") return "application/javascript";
@@ -831,9 +797,8 @@ std::string Server::getMimeType(const std::string& filePath) {
         if (ext == "gif") return "image/gif";
         if (ext == "svg") return "image/svg+xml";
         if (ext == "txt") return "text/plain";
-        // Add more MIME types as needed
     }
-    return "application/octet-stream"; // Default MIME type
+    return "application/octet-stream";
 }
 
 const char* Server::IncompleteServerException::what() const throw()

@@ -5,7 +5,7 @@
 bool hasExtension(const std::string& filename, const std::string& extension) {
     size_t dotPos = filename.rfind('.');
     if (dotPos == std::string::npos) {
-        return false; // No dot found in filename
+        return false;
     }
     return filename.substr(dotPos) == extension;
 }

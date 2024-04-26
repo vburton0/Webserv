@@ -5,7 +5,6 @@
 #include "../includes/Webserv.hpp"
 
 int main(int ac, char **av) {
-    // Config File and args handler
     std::string configFile;
     if (ac == 1) {
         configFile = "config/default.conf";
@@ -17,7 +16,6 @@ int main(int ac, char **av) {
     }
 
 
-    // Parse the configuration file
     Webserv webserv;
     try {
         webserv.init(configFile);

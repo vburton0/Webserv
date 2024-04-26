@@ -31,7 +31,6 @@ Location::Location(std::string line, std::ifstream & openFile, std::string root)
 			if (!line.compare("}"))
 			{
 				checkSetDefault();
-				// std::cout << "LOCATION: " << location << std::endl;
 				return ;
 			}
 			else
@@ -63,9 +62,8 @@ Location &Location::operator=(const Location & src)
 	return (*this);
 }
 
-void Location::compareBlockInfo(std::string line) // AVRIL
+void Location::compareBlockInfo(std::string line)
 {
-	//std::cout << "line: " << line << std::endl;
 	if (line[0] == '#')
 		;
 	else if (line[line.size() - 1] != ';' || line.find(';') != line.size() - 1)
@@ -205,7 +203,6 @@ void Location::checkSetDefault(void) {
         }
     }
 
-    // Set default methods if none are provided
     if (methods.empty()) {
         for (std::set<std::string>::const_iterator it = validMethods.begin(); it != validMethods.end(); ++it) {
         	methods.push_back(*it);

@@ -7,7 +7,6 @@ Webserv::~Webserv() {}
 
 
 void Webserv::init(std::string configFile) {
-    // Check if configFile extension is ".conf"
     if (!hasExtension(configFile, ".conf")) {
         std::cerr << "Invalid config file extension. Must be '.conf'." << std::endl;
     }
@@ -25,7 +24,7 @@ void Webserv::init(std::string configFile) {
 			if (!inServerBlock && !line.compare("server {"))
 			{
 				inServerBlock = true;
-				this->servers.push_back(new Server());  // Add new server to list WACTHOUT
+				this->servers.push_back(new Server());
 			}
 			else if (inServerBlock)
 			{
@@ -43,7 +42,7 @@ void Webserv::init(std::string configFile) {
     }
 	openFile.close();
 	if (this->servers.empty())
-		throw Webserv::InvalidFileContentException(); // No server block found //Watchout not same
+		throw Webserv::InvalidFileContentException();
 	
 	std::set<int> ports;
 	for (std::list<Server *>::iterator it = this->servers.begin(); it != this->servers.end(); it++)
@@ -67,7 +66,7 @@ void Webserv::launchServers(void)
 
 	size_t total_ports = 0;
 	for (; it_tmp != ite; it_tmp++)
-		total_ports += (*it_tmp)->ports.size();  // Count total number of ports to listen on
+		total_ports += (*it_tmp)->ports.size();
 
 	struct pollfd pfds[total_ports];
 	struct sockaddr_in address[total_ports];
@@ -91,9 +90,7 @@ void Webserv::launchServers(void)
 				return ;
 			}
 			pfds[index].events = POLLIN;
-			fcntl(pfds[index].fd, F_SETFL, O_NONBLOCK); //TO CHECK ON MACOS
 
-			fcntl(pfds[index].fd, F_SETFL, O_NONBLOCK);
 			address[index].sin_family = PF_INET;
 			address[index].sin_addr.s_addr = INADDR_ANY;
 			address[index].sin_port = htons(*pit);
@@ -145,20 +142,18 @@ void Webserv::launchServers(void)
 					continue ;
 				}
 
-				// addrlen = sizeof(address[index]);
 				if ((polling_serv->socketFd = accept(pfds[index].fd, NULL, 0)) < 0)
 				{
 					perror("accept");
 					return ;
 				}
-				fcntl(pfds[index].fd, F_SETFL, O_NONBLOCK);
 
 				try
 				{
 					std::string bufstr = polling_serv->recvRequest(1);
 					polling_serv->analyseRequest(bufstr);
 				}
-				catch (std::exception & e) {/*std::cerr << e.what() << std::endl;*/}
+				catch (std::exception & e) {}
 				std::cout << std::endl << "------------------content message sent to " << polling_serv->socketFd << "-------------------\n";
 				close(polling_serv->socketFd);
 			}

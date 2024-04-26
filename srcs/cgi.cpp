@@ -38,7 +38,6 @@ Cgi::Cgi(std::string header, std::string filePath, Server *serv, std::string sav
 			ssize_t written = write(bodyFd[1], dataPtr + offset, writeSize);
 
 			if (written == -1) {
-				// Handle error (e.g., log it, close file descriptors, exit)
 				perror("write to CGI script failed");
 				close(bodyFd[0]);
 				close(bodyFd[1]);
@@ -55,7 +54,6 @@ Cgi::Cgi(std::string header, std::string filePath, Server *serv, std::string sav
 		serv->sendError(500, "500 Internal Server Error");
 	if (!pid)
 	{
-		//Setup env
 		char **envp = setEnv(savedRoot);
 		char **args = getExecveArgs();
 		if (dup2(pipe_fd[1], 1) == -1)
@@ -132,10 +130,9 @@ Cgi::~Cgi(void)
 char** Cgi::getExecveArgs() {
     size_t size = _filePath.size();
 
-    char** res = new char*[3];  // Interpreter, script path, NULL
+    char** res = new char*[3];
     res[2] = NULL;
 
-    // Check for Python scripts
     if (size > 3 && _filePath.compare(size - 3, 3, ".py") == 0) {
         res[0] = strdup("/usr/bin/python3");
         res[1] = strdup(_filePath.c_str());
@@ -143,7 +140,7 @@ char** Cgi::getExecveArgs() {
     }
 
     delete[] res;
-    res = new char*[2]; // Only path and NULL
+    res = new char*[2];
     res[0] = strdup(_filePath.c_str());
     res[1] = NULL;
     return res;
@@ -210,8 +207,8 @@ std::string Cgi::getScriptRelative(std::string root)
 }
 
 std::string Cgi::getRemoteHost() {
-    size_t start = _header.find("Host: ") + 6; // Skip past "Host: "
-    size_t end = _header.find('\r', start); // Search for carriage return
+    size_t start = _header.find("Host: ") + 6;
+    size_t end = _header.find('\r', start);
     size_t indexPort = _header.find(':', start);
 
     if (indexPort != std::string::npos && indexPort < end) {
