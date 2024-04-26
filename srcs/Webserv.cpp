@@ -91,6 +91,7 @@ void Webserv::launchServers(void)
 			}
 			pfds[index].events = POLLIN;
 
+			fcntl(pfds[index].fd, F_SETFL, O_NONBLOCK);
 			address[index].sin_family = PF_INET;
 			address[index].sin_addr.s_addr = INADDR_ANY;
 			address[index].sin_port = htons(*pit);
