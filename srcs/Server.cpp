@@ -564,7 +564,6 @@ std::string Server::getPathFromLocations(std::string & loc, int methodOffset, st
 	for (size_t loc_index = 0; loc_index < this->_locations.size(); loc_index++)
 	{
 		size_t loc_size = this->_locations[loc_index]->location.size();
-		std::cout << "LOC SIZE: " << loc_size << std::endl;
 		if (loc_size <= substr_loc.size() && ((!this->_locations[loc_index]->suffixed && !substr_loc.compare(0, loc_size, this->_locations[loc_index]->location))
 			|| (this->_locations[loc_index]->suffixed && !substr_loc.compare(substr_loc.size() - loc_size, loc_size, this->_locations[loc_index]->location))))
 		{
